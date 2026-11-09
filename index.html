@@ -471,6 +471,27 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
   100%{opacity:0;transform:translate(calc(-50% + var(--fx,0px)),-170%) scale(.92) rotate(6deg);}
 }
 @media (prefers-reduced-motion:reduce){.fx-heart{animation:none;opacity:0;}}
+/* 身体和心情 */
+.sym-head{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.sym-head b{font-size:15px;}
+.sym-stage{font-size:11px;padding:3px 9px;border-radius:999px;background:rgba(255,159,196,.16);
+  border:1px solid rgba(255,159,196,.4);color:#ffc9da;}
+.sym-label{font-size:11.5px;letter-spacing:.1em;color:var(--muted);margin:0 0 8px;}
+.sym-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;}
+.sym-chip{font-family:inherit;font-size:12.5px;padding:7px 12px;border-radius:999px;cursor:pointer;
+  border:1px solid var(--line);background:rgba(255,255,255,.05);color:rgba(244,238,255,.72);transition:.15s;}
+.sym-chip.on{background:linear-gradient(135deg,rgba(255,214,166,.28),rgba(255,111,145,.34));
+  border-color:rgba(255,111,145,.6);color:#fff;font-weight:600;}
+.sym-divider{height:1px;background:var(--line);margin:4px 0 14px;}
+.sym-list{display:flex;flex-direction:column;gap:9px;}
+.sym-row{padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid var(--line);font-size:12.5px;line-height:1.8;}
+.sym-row .d{display:flex;align-items:center;gap:8px;margin-bottom:3px;}
+.sym-row .d b{font-size:13px;}
+.sym-row .t{color:var(--muted);}
+.sym-empty{font-size:12.5px;color:var(--muted);line-height:1.8;}
+.cal-dot{position:absolute;right:4px;top:3px;width:7px;height:7px;border-radius:50%;background:#ffd6a6;box-shadow:0 0 0 1.5px rgba(8,11,28,.9),0 0 6px rgba(255,214,166,.5);}
+.cal-dot.m{background:#ff9ec4;}
+.cal-dot.bm{background:linear-gradient(135deg,#ffd6a6,#ff9ec4);}
 </style>
 </head>
 <body>
@@ -701,7 +722,7 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
       <div class="set-row"><span>最近同步</span><b id="syncTime">-</b></div>
       <div class="set-row"><span>我的身份</span><b id="roleTxt">-</b></div>
       <div class="set-row"><span>空间编号</span><b id="gistId" style="font-size:11px">-</b></div>
-      <div class="set-row"><span>版本</span><b>v2.9</b></div>
+      <div class="set-row"><span>版本</span><b>v3.0</b></div>
       <div style="display:flex;gap:10px;margin-top:14px">
         <button class="btn small ghost" id="btnSync" style="flex:1">立即同步</button>
         <button class="btn small ghost" id="btnInvite" style="flex:1">复制邀请码</button>
@@ -777,6 +798,22 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
         <button class="btn small" id="cycAdd" type="button">记下这天</button>
       </div>
       <button class="btn small ghost" id="cycToday" style="width:100%;margin-top:10px">今天来了</button>
+    </div>
+
+    <p class="sec-title">身体和心情</p>
+    <div class="card">
+      <div class="sym-head">
+        <b id="symDate">今天</b>
+        <span class="sym-stage" id="symStage">平常</span>
+      </div>
+      <p class="sym-label">身体</p>
+      <div class="sym-chips" id="symBody"></div>
+      <p class="sym-label">心情</p>
+      <div class="sym-chips" id="symMood"></div>
+      <p class="tip">点一下记上，再点一下取消。默认记到今天；在日历上点了某一天，这里就跟着换成那天。</p>
+      <div class="sym-divider"></div>
+      <p class="sym-label">记过的日子</p>
+      <div class="sym-list" id="symList"></div>
     </div>
 
     <p class="sec-title">最近记录 <span id="cycCount" style="color:rgba(244,238,255,.45)"></span></p>
@@ -933,7 +970,7 @@ var API = 'https://api.github.com';
 var FILE_NAME = 'couple.json';
 var LS_CFG = 'lp_cfg_v1';
 var LS_DATA = 'lp_data_v1';
-var BUILD_ID = 'b20261110-0700';
+var BUILD_ID = 'b20261110-0800';
 
 var cfg = null;
 var data = null;
@@ -977,7 +1014,7 @@ function defaultData(){
     meals : [],
     mealsCleanTs : 0,
     likes : [],
-    cycle : { records : [], dur : 5, ovu : [], len : 0, rid : {}, ovid : {} },
+    cycle : { records : [], dur : 5, ovu : [], len : 0, rid : {}, ovid : {}, sym : {} },
     char : { name : '小绒', face : '🐱', look : 'c1', style : '温柔', lines : [], hasAvatar : false, ts : 0 },
     games : { quiz : null, cards : [], wheel : null },
     moods : {}
@@ -1001,6 +1038,7 @@ function loadLocal(){
   if(!data.cycle || !data.cycle.records) data.cycle = { records : [], dur : 5, ovu : [], len : 0, rid : {}, ovid : {} };
   if(!data.cycle.rid) data.cycle.rid = {};
   if(!data.cycle.ovid) data.cycle.ovid = {};
+  if(!data.cycle.sym) data.cycle.sym = {};
   if(!data.games) data.games = {};
   if(!data.games.cards) data.games.cards = [];
   if(!data.moods) data.moods = {};
@@ -1139,6 +1177,12 @@ function mergeRemote(remote){
     data.cycle.ovid = lovd;
     data.cycle.records = data.cycle.records.filter(function(x){ return !(x && data.cycle.rid[x.id]); });
     data.cycle.ovu = data.cycle.ovu.filter(function(x){ return !(x && data.cycle.ovid[x.id]); });
+    var lsy = data.cycle.sym || {}, rsy = remote.cycle.sym || {};
+    for(var syk in rsy){
+      if(!rsy.hasOwnProperty(syk)) continue;
+      if(!lsy[syk] || (rsy[syk].ts || 0) > (lsy[syk].ts || 0)) lsy[syk] = rsy[syk];
+    }
+    data.cycle.sym = lsy;
     if(remote.cycle.len) data.cycle.len = remote.cycle.len;
     if(remote.cycle.dur) data.cycle.dur = remote.cycle.dur;
   }
@@ -2126,6 +2170,7 @@ function cycleObj(){
   if(!data.cycle.len) data.cycle.len = 0;
   if(!data.cycle.rid) data.cycle.rid = {};
   if(!data.cycle.ovid) data.cycle.ovid = {};
+  if(!data.cycle.sym) data.cycle.sym = {};
   return data.cycle;
 }
 function calKey(d){ return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
@@ -2209,6 +2254,13 @@ function renderCalendar(){
     else if(mk.pp) el.classList.add("pp");
     if(k === tk) el.classList.add("today");
     if(k === calSel) el.classList.add("sel");
+    var sy = (cycleObj().sym || {})[k];
+    if(sy && ((sy.p && sy.p.length) || (sy.m && sy.m.length))){
+      var dot = document.createElement("i");
+      var hasB = sy.p && sy.p.length, hasM = sy.m && sy.m.length;
+      dot.className = "cal-dot" + (hasB && hasM ? " bm" : (hasM ? " m" : ""));
+      el.appendChild(dot);
+    }
     grid.appendChild(el);
   }
 }
@@ -2221,6 +2273,7 @@ function calPick(key){
   $("#calOpsDate").textContent = (d.getMonth() + 1) + "月" + d.getDate() + "日 · 周" + wk;
   $("#calOps").classList.remove("hidden");
   renderCalendar();
+  renderSym();
 }
 
 function renderCycle(){
@@ -2265,6 +2318,7 @@ function renderCycle(){
   }
 
   renderCalendar();
+  renderSym();
 
   var list = $("#cycList");
   list.innerHTML = "";
@@ -2357,6 +2411,106 @@ function addCycleDate(dateStr){
   if($("#cycDate")) $("#cycDate").value = "";
   renderCycle();
   toast('记下了 ' + dateStr);
+}
+
+/* ---------- 身体和心情 ---------- */
+var SYM_BODY = ['腹痛', '腰酸', '乳房胀', '头痛', '乏力', '想睡', '恶心', '食欲差', '嘴馋', '长痘', '水肿', '便秘'];
+var SYM_MOOD = ['烦躁', '低落', '敏感', '焦虑', '想哭', '粘人', '平静', '开心', '易怒', '不想说话'];
+function symKey(){ return calSel || todayStr(); }
+function symOf(k){
+  var c = cycleObj();
+  c.sym = c.sym || {};
+  return c.sym[k] || null;
+}
+function symStage(k){
+  var mk = calMarks()[k] || {};
+  if(mk.p) return '经期';
+  if(mk.o) return '排卵日';
+  if(mk.f) return '易孕期';
+  if(mk.pp) return '预计经期';
+  return '平常';
+}
+function symToggle(kind, tag){
+  var k = symKey();
+  act(function(){
+    var c = cycleObj();
+    c.sym = c.sym || {};
+    var it = c.sym[k] || { p : [], m : [], ts : 0, role : myRole() };
+    if(!it.p) it.p = [];
+    if(!it.m) it.m = [];
+    var arr = kind === "p" ? it.p : it.m;
+    var i = arr.indexOf(tag);
+    if(i >= 0) arr.splice(i, 1); else arr.push(tag);
+    it.ts = Date.now();
+    it.role = myRole();
+    c.sym[k] = it;
+  });
+  renderSym();
+}
+function symChips(el, list, sel, kind){
+  el.innerHTML = "";
+  list.forEach(function(tag){
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "sym-chip" + (sel.indexOf(tag) >= 0 ? " on" : "");
+    b.textContent = tag;
+    b.addEventListener("click", function(){ symToggle(kind, tag); });
+    el.appendChild(b);
+  });
+}
+function renderSym(){
+  var body = $("#symBody");
+  if(!body) return;
+  var k = symKey();
+  var d = parseDate(k);
+  var it = symOf(k) || { p : [], m : [] };
+  $("#symDate").textContent = (d.getMonth() + 1) + "月" + d.getDate() + "日";
+  $("#symStage").textContent = symStage(k);
+  symChips(body, SYM_BODY, it.p || [], "p");
+  symChips($("#symMood"), SYM_MOOD, it.m || [], "m");
+  renderSymList();
+}
+function renderSymList(){
+  var box = $("#symList");
+  if(!box) return;
+  var c = cycleObj(), sym = c.sym || {};
+  var keys = Object.keys(sym).filter(function(k){
+    var v = sym[k];
+    return v && ((v.p && v.p.length) || (v.m && v.m.length));
+  });
+  keys.sort(function(a, b){ return a < b ? 1 : -1; });
+  box.innerHTML = "";
+  if(!keys.length){
+    var e = document.createElement("div");
+    e.className = "sym-empty";
+    e.textContent = "还没记过。选几个词点一下就好，攒几次就能看出规律。";
+    box.appendChild(e);
+    return;
+  }
+  keys.slice(0, 8).forEach(function(k){
+    var v = sym[k];
+    var row = document.createElement("div");
+    row.className = "sym-row";
+    var head = document.createElement("div");
+    head.className = "d";
+    var b = document.createElement("b");
+    var dd = parseDate(k);
+    b.textContent = (dd.getMonth() + 1) + "月" + dd.getDate() + "日";
+    head.appendChild(b);
+    var st = document.createElement("span");
+    st.className = "sym-stage";
+    st.textContent = symStage(k);
+    head.appendChild(st);
+    row.appendChild(head);
+    var t = document.createElement("div");
+    t.className = "t";
+    var parts = [];
+    if(v.p && v.p.length) parts.push("身体 " + v.p.join("·"));
+    if(v.m && v.m.length) parts.push("心情 " + v.m.join("·"));
+    t.textContent = parts.join("　");
+    row.appendChild(t);
+    box.appendChild(row);
+  });
 }
 
 /* ---------- 喜好 ---------- */
