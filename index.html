@@ -486,7 +486,7 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
       <div class="set-row"><span>状态</span><b id="syncState">已连接</b></div>
       <div class="set-row"><span>最近同步</span><b id="syncTime">-</b></div>
       <div class="set-row"><span>空间编号</span><b id="gistId" style="font-size:11px">-</b></div>
-      <div class="set-row"><span>版本</span><b>v1.3</b></div>
+      <div class="set-row"><span>版本</span><b>v1.4</b></div>
       <div style="display:flex;gap:10px;margin-top:14px">
         <button class="btn small ghost" id="btnSync" style="flex:1">立即同步</button>
         <button class="btn small ghost" id="btnInvite" style="flex:1">复制邀请码</button>
@@ -525,6 +525,7 @@ var API = 'https://api.github.com';
 var FILE_NAME = 'couple.json';
 var LS_CFG = 'lp_cfg_v1';
 var LS_DATA = 'lp_data_v1';
+var BUILD_ID = 'b20261109-1400';
 
 var cfg = null;
 var data = null;
@@ -1566,9 +1567,28 @@ function showView(name){
   window.scrollTo(0, 0);
 }
 
+/* ---------- 自动检查更新 ---------- */
+function checkUpdate(){
+  try{
+    var last = +sessionStorage.getItem('lp_upd') || 0;
+    if(Date.now() - last < 300000) return;
+    sessionStorage.setItem('lp_upd', Date.now());
+  }catch(e){}
+  if(location.protocol !== 'http:' && location.protocol !== 'https:') return;
+  fetch(location.pathname + '?_upd=' + Date.now(), { cache : 'no-store' }).then(function(r){
+    return r.text();
+  }).then(function(txt){
+    var m = txt.match(/var BUILD_ID = '([^']+)'/);
+    if(m && m[1] && m[1] !== BUILD_ID){
+      location.replace(location.pathname + '?fresh=' + Date.now());
+    }
+  }).catch(function(){});
+}
+
 /* ---------- 初始化界面 ---------- */
 function boot(){
   loadLocal();
+  setTimeout(checkUpdate, 1200);
   if(cfg && cfg.token && cfg.gistId){
     $('#setup').classList.add('hidden');
     $('#main').classList.remove('hidden');
