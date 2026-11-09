@@ -17,6 +17,7 @@
   --gold:#ffd6a6;
   --text:#f4eeff;
   --muted:rgba(244,238,255,.6);
+  color-scheme:dark;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 html,body{margin:0;padding:0;width:100%;overflow-x:hidden;}
@@ -33,6 +34,32 @@ body{
 }
 ::-webkit-scrollbar{width:0;}
 
+input[type="date"],input[type="time"],input[type="datetime-local"],input[type="month"]{
+  background:rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.26);
+  color:var(--text);
+  min-height:46px;
+  padding:10px 12px;
+  font-weight:500;
+}
+input[type="date"]:focus,input[type="time"]:focus,input[type="datetime-local"]:focus,input[type="month"]:focus{
+  background:rgba(255,255,255,.14);
+  border-color:rgba(255,159,196,.75);
+}
+input[type="date"]::-webkit-datetime-edit,
+input[type="time"]::-webkit-datetime-edit,
+input[type="datetime-local"]::-webkit-datetime-edit,
+input[type="month"]::-webkit-datetime-edit{color:var(--text);padding:0;}
+input[type="date"]::-webkit-datetime-edit-text,
+input[type="time"]::-webkit-datetime-edit-text{color:rgba(244,238,255,.55);}
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+input[type="month"]::-webkit-calendar-picker-indicator{
+  filter:invert(1) brightness(1.5);
+  opacity:.92;
+  cursor:pointer;
+}
 /* ---------- 通用 ---------- */
 .wrap{padding:0 18px;}
 .card{
@@ -664,7 +691,7 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
       <div class="set-row"><span>最近同步</span><b id="syncTime">-</b></div>
       <div class="set-row"><span>我的身份</span><b id="roleTxt">-</b></div>
       <div class="set-row"><span>空间编号</span><b id="gistId" style="font-size:11px">-</b></div>
-      <div class="set-row"><span>版本</span><b>v2.5</b></div>
+      <div class="set-row"><span>版本</span><b>v2.6</b></div>
       <div style="display:flex;gap:10px;margin-top:14px">
         <button class="btn small ghost" id="btnSync" style="flex:1">立即同步</button>
         <button class="btn small ghost" id="btnInvite" style="flex:1">复制邀请码</button>
@@ -896,7 +923,7 @@ var API = 'https://api.github.com';
 var FILE_NAME = 'couple.json';
 var LS_CFG = 'lp_cfg_v1';
 var LS_DATA = 'lp_data_v1';
-var BUILD_ID = 'b20261110-0400';
+var BUILD_ID = 'b20261110-0430';
 
 var cfg = null;
 var data = null;
