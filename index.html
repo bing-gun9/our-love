@@ -208,6 +208,32 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
 #lightbox .lc{font-size:13px;color:rgba(244,238,255,.75);text-align:center;line-height:1.8;max-width:82vw;}
 #lightbox .row{display:flex;gap:12px;}
 
+/* 小游戏 */
+.qz-q{font-size:15px;line-height:1.85;font-weight:600;margin-bottom:14px;}
+.qz-opts{display:flex;flex-direction:column;gap:9px;}
+.qz-opt{
+  padding:12px 14px;border-radius:12px;border:1px solid var(--line);
+  background:rgba(255,255,255,.045);font-size:14px;color:var(--text);
+  text-align:left;font-family:inherit;cursor:pointer;transition:.15s;
+}
+.qz-opt.on{background:linear-gradient(135deg,rgba(255,214,166,.22),rgba(255,111,145,.3));border-color:rgba(255,111,145,.55);}
+.qz-opt:disabled{opacity:.55;}
+.qz-status{margin-top:14px;font-size:12.5px;color:var(--muted);line-height:1.9;}
+.qz-res{margin-top:10px;font-size:14px;line-height:1.9;}
+.qz-score{margin-top:8px;font-size:12px;color:var(--pink-soft);letter-spacing:.04em;}
+.card-face{
+  padding:16px 16px 18px;border-radius:14px;line-height:1.95;font-size:14.5px;
+  background:linear-gradient(135deg,rgba(255,214,166,.16),rgba(255,111,145,.2));
+  border:1px solid rgba(255,111,145,.35);
+}
+.card-face .who{font-size:11.5px;color:rgba(244,238,255,.65);margin-bottom:8px;letter-spacing:.06em;}
+.wheel-out{
+  margin-top:14px;text-align:center;font-size:24px;font-weight:600;line-height:1.6;
+  background:linear-gradient(180deg,#fff,#ffa9c4 70%,#ff6f91);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.wheel-hint{margin-top:6px;text-align:center;font-size:12px;color:var(--muted);}
+
 /* 提示 */
 #toast{
   position:fixed;left:50%;top:16%;transform:translate(-50%,-8px);
@@ -353,6 +379,34 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
     <p class="tip">照片会自动压缩，存进你们俩的私有空间，别人看不到。点一张可以看大图，大图里能删除。</p>
   </div>
 
+  <!-- 一起玩 -->
+  <div id="view-games" class="view wrap hidden">
+    <p class="sec-title">今天的默契题</p>
+    <div class="card" id="quizCard"></div>
+
+    <p class="sec-title">真心话 · 大冒险</p>
+    <div class="card">
+      <div style="display:flex;gap:10px">
+        <button class="btn small" id="btnTruth" type="button" style="flex:1">抽 真心话</button>
+        <button class="btn small ghost" id="btnDare" type="button" style="flex:1">抽 大冒险</button>
+      </div>
+      <div id="cardBox" style="margin-top:14px"></div>
+    </div>
+
+    <p class="sec-title">今天听谁的</p>
+    <div class="card">
+      <div style="display:flex;gap:10px">
+        <input id="wheelA" type="text" maxlength="8" placeholder="选项一">
+        <input id="wheelB" type="text" maxlength="8" placeholder="选项二">
+      </div>
+      <button class="btn" id="btnWheel" type="button" style="width:100%;margin-top:12px">转一下</button>
+      <div id="wheelBox"></div>
+    </div>
+
+    <p class="tip">这些都会同步：TA 那边几秒后就能看到你抽到什么、转到了谁。每天换一道默契题，答完自动累加默契次数。</p>
+    <div style="height:20px"></div>
+  </div>
+
   <!-- 设置 -->
   <div id="view-me" class="view wrap hidden">
     <p class="sec-title">我们的资料</p>
@@ -370,7 +424,7 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
       <div class="set-row"><span>状态</span><b id="syncState">已连接</b></div>
       <div class="set-row"><span>最近同步</span><b id="syncTime">-</b></div>
       <div class="set-row"><span>空间编号</span><b id="gistId" style="font-size:11px">-</b></div>
-      <div class="set-row"><span>版本</span><b>v1.1</b></div>
+      <div class="set-row"><span>版本</span><b>v1.2</b></div>
       <div style="display:flex;gap:10px;margin-top:14px">
         <button class="btn small ghost" id="btnSync" style="flex:1">立即同步</button>
         <button class="btn small ghost" id="btnInvite" style="flex:1">复制邀请码</button>
@@ -392,8 +446,9 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
     <button data-view="home" class="on"><span class="ic">⌂</span><span class="lb">首页</span></button>
     <button data-view="diary"><span class="ic">✎</span><span class="lb">日记</span></button>
     <button data-view="wish"><span class="ic">✦</span><span class="lb">心愿</span></button>
-    <button data-view="note"><span class="ic">✉</span><span class="lb">悄悄话</span></button>
+    <button data-view="note"><span class="ic">✉</span><span class="lb">悄悄</span></button>
     <button data-view="photo"><span class="ic">▦</span><span class="lb">相簿</span></button>
+    <button data-view="games"><span class="ic">✿</span><span class="lb">一起玩</span></button>
     <button data-view="me"><span class="ic">♡</span><span class="lb">我们</span></button>
   </nav>
 </div>
@@ -447,6 +502,7 @@ function defaultData(){
     wishes : [],
     notes : [],
     photos : [],
+    games : { quiz : null, cards : [], wheel : null },
     moods : {}
   };
 }
@@ -458,6 +514,8 @@ function loadLocal(){
   if(!data.wishes) data.wishes = [];
   if(!data.notes) data.notes = [];
   if(!data.photos) data.photos = [];
+  if(!data.games) data.games = {};
+  if(!data.games.cards) data.games.cards = [];
   if(!data.moods) data.moods = {};
 }
 function saveLocal(){
@@ -526,6 +584,27 @@ function mergeRemote(remote){
   data.wishes = mergeList(data.wishes, remote.wishes);
   data.notes = mergeList(data.notes, remote.notes);
   data.photos = mergeList(data.photos, remote.photos);
+  if(remote.games){
+    var lg = gamesObj(), rg = remote.games;
+    if(rg.quiz){
+      var lq = lg.quiz;
+      if(!lq || rg.quiz.day !== lq.day){
+        if(!lq || (rg.quiz.day || '') > (lq.day || '')) lg.quiz = rg.quiz;
+      }else{
+        lg.quiz.ansA = lq.ansA || rg.quiz.ansA || '';
+        lg.quiz.ansB = lq.ansB || rg.quiz.ansB || '';
+        lg.quiz.ts = Math.max(lq.ts || 0, rg.quiz.ts || 0);
+      }
+    }
+    lg.cards = mergeList(lg.cards, rg.cards);
+    if(rg.wheel && (!lg.wheel || (rg.wheel.ts || 0) > (lg.wheel.ts || 0))) lg.wheel = rg.wheel;
+    if(rg.hist){
+      lg.hist = lg.hist || {};
+      for(var k in rg.hist){
+        if(rg.hist.hasOwnProperty(k) && !lg.hist[k]) lg.hist[k] = rg.hist[k];
+      }
+    }
+  }
   if(remote.moods){
     ['A', 'B'].forEach(function(k){
       var l = data.moods[k], r = remote.moods[k];
@@ -642,6 +721,7 @@ function render(){
   renderNotes();
   renderSettings();
   if($('#view-photo') && !$('#view-photo').classList.contains('hidden')) renderPhotos();
+  if($('#view-games') && !$('#view-games').classList.contains('hidden')) renderGames();
 }
 
 function renderMoods(){
@@ -960,6 +1040,228 @@ function delPhoto(p){
   commit().catch(function(e){ toast(e.message); });
 }
 
+/* ---------- 一起玩 ---------- */
+var QUIZ = [
+  { q : '如果能瞬间传送一次，你最想传到哪儿？', o : ['TA 身边', '自己的被窝'] },
+  { q : '周末最想一起干的事？', o : ['出门逛吃一整天', '窝着看剧什么都不干'] },
+  { q : '出门吃饭更想吃？', o : ['火锅', '烧烤'] },
+  { q : '你更想收到哪种礼物？', o : ['实用的', '有仪式感的'] },
+  { q : '理想的相处节奏？', o : ['天天黏在一起', '各自留点空间也挺好'] },
+  { q : '一起看片子更偏？', o : ['科幻动作', '爱情文艺'] },
+  { q : '如果距离能立刻缩短 100 公里，你会？', o : ['马上冲过去见一面', '不急，慢慢来'] },
+  { q : '吵架之后你更希望对方？', o : ['先来哄我', '先让我静一静'] },
+  { q : '更喜欢哪种天气？', o : ['下雨天', '大晴天'] },
+  { q : '睡前的最后一个小时最想？', o : ['聊天聊到睡着', '各刷各的手机'] },
+  { q : '见面的频率，你觉得？', o : ['能多就多', '一个月一两次刚刚好'] },
+  { q : '更想一起去的地方？', o : ['海边', '山上'] }
+];
+
+var TRUTH_CARDS = [
+  '第一次觉得「就是 TA 了」，是在什么瞬间？',
+  '你手机里关于 TA 的照片，最喜欢哪一张？为什么？',
+  '有没有一句话，你一直想说但没说出口？',
+  '你偷偷希望 TA 改掉的一个小习惯是什么？',
+  '你们之间，最让你觉得踏实的细节是什么？',
+  '如果只能记住你们之间的一天，你选哪一天？',
+  '你最怕失去 TA 的哪一部分？',
+  '有没有哪次你其实很难过，但没有告诉 TA？',
+  '你觉得 TA 最不了解你的地方是哪儿？',
+  '说一件你从没跟 TA 讲过的、关于你自己的事。'
+];
+
+var DARE_CARDS = [
+  '给 TA 发一条 10 秒语音，只说一句「我想你了」。',
+  '拍一张你此刻窗外的照片，发给 TA。',
+  '说出 TA 的三个优点，要具体，不能只说「好」。',
+  '现在打开相册，翻到你们第一张合照，发给 TA。',
+  '用一句话，形容你眼里的 TA。',
+  '给 TA 写一句只有你们两个看得懂的话。',
+  '把手机亮度调到最亮，拍一张自拍发给 TA（不许精修）。',
+  '给 TA 讲一个你小时候的糗事。',
+  '现在立刻说出你们在一起的日期和天数。',
+  '许一个未来三个月内你们要一起完成的小愿望，写进心愿页。'
+];
+
+function todayStr(){
+  var d = new Date();
+  return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+}
+function gamesObj(){
+  if(!data.games) data.games = {};
+  if(!data.games.cards) data.games.cards = [];
+  if(!data.games.hist) data.games.hist = {};
+  return data.games;
+}
+function ensureQuiz(){
+  var g = gamesObj();
+  var q = g.quiz;
+  var today = todayStr();
+  if(!q || q.day !== today){
+    var idx = Math.floor(new Date().setHours(0, 0, 0, 0) / 86400000) % QUIZ.length;
+    g.quiz = { day : today, idx : idx, ansA : '', ansB : '', ts : Date.now() };
+    saveLocal();
+  }
+  return g.quiz;
+}
+function quizSame(q){ return q.ansA !== '' && q.ansB !== '' && q.ansA === q.ansB; }
+function quizScore(){
+  var h = gamesObj().hist, n = 0, day;
+  for(day in h){ if(h.hasOwnProperty(day) && h[day] && h[day].same) n++; }
+  return n;
+}
+
+var syncTimer = null;
+function scheduleSync(){
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(function(){
+    commit().catch(function(e){ toast(e.message); });
+  }, 900);
+}
+
+function renderQuiz(){
+  var box = $('#quizCard');
+  if(!box) return;
+  var q = ensureQuiz();
+  var item = QUIZ[q.idx % QUIZ.length];
+  var mine = myRole() === 'A' ? q.ansA : q.ansB;
+  var other = myRole() === 'A' ? q.ansB : q.ansA;
+
+  box.innerHTML = '';
+
+  var qt = document.createElement('div');
+  qt.className = 'qz-q';
+  qt.textContent = item.q;
+  box.appendChild(qt);
+
+  var opts = document.createElement('div');
+  opts.className = 'qz-opts';
+  item.o.forEach(function(txt, i){
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'qz-opt' + (mine === String(i) ? ' on' : '');
+    b.textContent = txt;
+    b.disabled = (mine !== '' && mine !== undefined);
+    b.addEventListener('click', function(){
+      if(mine !== ''){ return; }
+      act(function(){
+        var qq = ensureQuiz();
+        if(myRole() === 'A') qq.ansA = String(i); else qq.ansB = String(i);
+        qq.ts = Date.now();
+      });
+      toast('记下了');
+    });
+    opts.appendChild(b);
+  });
+  box.appendChild(opts);
+
+  var st = document.createElement('div');
+  st.className = 'qz-status';
+  if(mine === '' || mine === undefined){
+    st.textContent = other !== '' ? 'TA 已经答了，等你选一个' : '两个人都还没答，先选一个';
+  }else if(other === '' || other === undefined){
+    st.textContent = '你已经答了，等 TA 那边作答…';
+  }
+  box.appendChild(st);
+
+  if(mine !== '' && other !== ''){
+    var res = document.createElement('div');
+    res.className = 'qz-res';
+    var same = (mine === other);
+    res.textContent = '你选「' + item.o[+mine] + '」，TA 选「' + item.o[+other] + '」' + (same ? ' —— 想到一块去了 ♡' : ' —— 这次没对上');
+    box.appendChild(res);
+
+    var h = gamesObj().hist;
+    if(!h[q.day]){
+      h[q.day] = { same : same, ts : Date.now() };
+      saveLocal();
+      scheduleSync();
+    }
+  }
+
+  var sc = document.createElement('div');
+  sc.className = 'qz-score';
+  sc.textContent = '累计默契 ' + quizScore() + ' 次';
+  box.appendChild(sc);
+}
+
+function renderCards(){
+  var box = $('#cardBox');
+  if(!box) return;
+  box.innerHTML = '';
+  var cards = gamesObj().cards;
+  if(!cards.length){
+    var e = document.createElement('p');
+    e.className = 'tip';
+    e.style.margin = '0';
+    e.textContent = '还没抽过。点上面的按钮抽一张，TA 也能看到你抽到什么。';
+    box.appendChild(e);
+    return;
+  }
+  var mine = null, other = null;
+  cards.forEach(function(c){
+    if(!mine && c.role === myRole()) mine = c;
+    if(!other && c.role !== myRole()) other = c;
+  });
+  [mine, other].forEach(function(c){
+    if(!c) return;
+    var el = document.createElement('div');
+    el.className = 'card-face';
+    el.style.marginBottom = '10px';
+    var who = document.createElement('div');
+    who.className = 'who';
+    who.textContent = nameOf(c.role) + ' 抽到的' + (c.kind === 'truth' ? '真心话' : '大冒险') + ' · ' + fmtTime(c.ts);
+    el.appendChild(who);
+    var tx = document.createElement('div');
+    tx.textContent = c.text;
+    el.appendChild(tx);
+    box.appendChild(el);
+  });
+}
+
+function drawCard(kind){
+  var arr = kind === 'truth' ? TRUTH_CARDS : DARE_CARDS;
+  var txt = arr[Math.floor(Math.random() * arr.length)];
+  act(function(){
+    var g = gamesObj();
+    g.cards.unshift({ id : uid(), role : myRole(), kind : kind, text : txt, ts : Date.now() });
+    if(g.cards.length > 40) g.cards = g.cards.slice(0, 40);
+  });
+  if($('#view-games') && !$('#view-games').classList.contains('hidden')) renderCards();
+}
+
+function renderWheel(){
+  var box = $('#wheelBox');
+  if(!box) return;
+  var w = gamesObj().wheel;
+  var a = $('#wheelA'), b = $('#wheelB');
+  if(a && b && w && w.options && document.activeElement !== a && document.activeElement !== b){
+    if(!a.value) a.value = w.options[0] || '';
+    if(!b.value) b.value = w.options[1] || '';
+  }
+  box.innerHTML = '';
+  if(!w){
+    var hint = document.createElement('div');
+    hint.className = 'wheel-hint';
+    hint.textContent = '比如「谁去洗碗 / 今天吃什么」，转一下决定谁说了算。';
+    box.appendChild(hint);
+    return;
+  }
+  var out = document.createElement('div');
+  out.className = 'wheel-out';
+  out.textContent = (w.options && w.options[w.pick]) || '';
+  box.appendChild(out);
+  var h2 = document.createElement('div');
+  h2.className = 'wheel-hint';
+  h2.textContent = '由 ' + nameOf(w.by) + ' 转出 · ' + fmtTime(w.ts);
+  box.appendChild(h2);
+}
+
+function renderGames(){
+  renderQuiz();
+  renderCards();
+  renderWheel();
+}
+
 function esc(s){
   return (s == null ? '' : String(s))
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -986,6 +1288,7 @@ function showView(name){
     renderPhotos();
     loadPhotos().catch(function(e){ toast(e.message); });
   }
+  if(name === 'games'){ renderGames(); }
   window.scrollTo(0, 0);
 }
 
@@ -1208,6 +1511,20 @@ $('#phAdd').addEventListener('click', function(){ $('#phFile').click(); });
 $('#phFile').addEventListener('change', function(e){
   uploadPhotos(e.target.files);
   e.target.value = '';
+});
+
+$('#btnTruth').addEventListener('click', function(){ drawCard('truth'); });
+$('#btnDare').addEventListener('click', function(){ drawCard('dare'); });
+$('#btnWheel').addEventListener('click', function(){
+  var a = $('#wheelA').value.trim() || '听我的';
+  var b = $('#wheelB').value.trim() || '听你的';
+  var pick = Math.random() < 0.5 ? 0 : 1;
+  act(function(){
+    var g = gamesObj();
+    g.wheel = { options : [a, b], pick : pick, by : myRole(), ts : Date.now() };
+  });
+  renderWheel();
+  toast('转到了：' + [a, b][pick]);
 });
 
 $all('.tabbar button').forEach(function(b){
