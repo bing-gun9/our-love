@@ -218,6 +218,21 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
 .lk-item .x{background:transparent;border:0;color:rgba(244,238,255,.32);font-size:13px;cursor:pointer;padding:0;flex:0 0 auto;font-family:inherit;}
 .lk-empty{font-size:11.5px;color:rgba(244,238,255,.35);line-height:1.7;}
 
+/* 角色 */
+.char-card{display:flex;gap:14px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;margin-top:14px;}
+.char-face{width:58px;height:58px;flex:0 0 58px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:30px;background:linear-gradient(135deg,rgba(255,159,196,.26),rgba(168,140,255,.26));border:1px solid rgba(255,255,255,.14);overflow:hidden;}
+.char-face img{width:100%;height:100%;object-fit:cover;}
+.char-face.big{width:88px;height:88px;flex:0 0 88px;font-size:44px;}
+.char-talk{flex:1;min-width:0;cursor:pointer;}
+.char-name{font-size:12px;color:var(--pink-soft);margin:0 0 6px;letter-spacing:.06em;}
+.bubble{font-size:13px;line-height:1.65;color:var(--text);background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.09);border-radius:12px;padding:9px 12px;margin:0;}
+.char-preview{display:flex;gap:14px;align-items:center;margin-bottom:16px;}
+.face-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+.face-opt{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:rgba(255,255,255,.05);font-size:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit;color:#fff;padding:0;}
+.face-opt.on{border-color:rgba(255,159,196,.8);background:rgba(255,159,196,.16);}
+.style-opt{padding:8px 13px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--muted);font-size:12.5px;cursor:pointer;font-family:inherit;}
+.style-opt.on{border-color:rgba(255,159,196,.75);color:#fff;background:rgba(255,159,196,.16);}
+
 /* 底部输入条 */
 .composer{
   position:sticky;bottom:calc(66px + env(safe-area-inset-bottom));
@@ -446,6 +461,14 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
       <div class="mini"><b id="miniNotes">0</b><span>句悄悄话</span></div>
     </div>
 
+    <div class="char-card" id="homeChar">
+      <div class="char-face" id="homeFace">🐱</div>
+      <div class="char-talk" id="homeTalk">
+        <p class="char-name" id="homeCharName">小绒</p>
+        <p class="bubble" id="homeSay">点我一下，我有话说</p>
+      </div>
+    </div>
+
     <p class="sec-title">今天的心情</p>
     <div id="moodBox"></div>
   </div>
@@ -555,7 +578,7 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
       <div class="set-row"><span>最近同步</span><b id="syncTime">-</b></div>
       <div class="set-row"><span>我的身份</span><b id="roleTxt">-</b></div>
       <div class="set-row"><span>空间编号</span><b id="gistId" style="font-size:11px">-</b></div>
-      <div class="set-row"><span>版本</span><b>v1.7</b></div>
+      <div class="set-row"><span>版本</span><b>v1.8</b></div>
       <div style="display:flex;gap:10px;margin-top:14px">
         <button class="btn small ghost" id="btnSync" style="flex:1">立即同步</button>
         <button class="btn small ghost" id="btnInvite" style="flex:1">复制邀请码</button>
@@ -636,6 +659,45 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
     <p class="tip">写完之后对方刷新就能看到。自己写的可以删，对方写的也能删（会同步到两边）。</p>
   </div>
 
+  <!-- 角色 -->
+  <div id="view-char" class="view wrap hidden">
+    <p class="sec-title">我们的小人</p>
+    <div class="card">
+      <div class="char-preview">
+        <div class="char-face big" id="charFace">🐱</div>
+        <div class="bubble" id="charSay" style="flex:1">点我换一句</div>
+      </div>
+
+      <div class="field">
+        <label>它叫什么</label>
+        <input id="charName" maxlength="10" placeholder="比如：小绒">
+      </div>
+
+      <div class="field">
+        <label>形象</label>
+        <div class="face-row" id="faceRow"></div>
+        <button class="btn small ghost" id="charUpload" style="width:100%;margin-top:8px;height:42px;display:flex;align-items:center;justify-content:center">用照片当它的样子</button>
+        <input type="file" id="charFile" accept="image/*" style="display:none">
+      </div>
+
+      <div class="field" style="margin-bottom:0">
+        <label>说话风格</label>
+        <div class="face-row" id="styleRow"></div>
+      </div>
+    </div>
+
+    <p class="sec-title">它自己会说的话 <span id="lineCount" style="color:rgba(244,238,255,.45)"></span></p>
+    <div class="card">
+      <div class="cyc-add">
+        <input id="lineInput" maxlength="30" placeholder="写一句它会说的话">
+        <button class="btn small" id="lineAdd" type="button">加</button>
+      </div>
+      <div class="lk-list" id="lineList" style="margin-top:10px"></div>
+      <p class="tip">除了你写的话，它还会按风格自己说。碰上经期、她心情不好，它会自动换成关心的话。</p>
+    </div>
+  </div>
+
+
   <div id="sheetMask" class="sheet-mask"></div>
   <div id="sheet" class="sheet">
     <div class="sheet-grab"></div>
@@ -644,6 +706,7 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
       <button type="button" data-view="games"><span class="si">✿</span><span class="sl">一起玩</span></button>
       <button type="button" data-view="cycle"><span class="si">❀</span><span class="sl">生理期</span></button>
       <button type="button" data-view="like"><span class="si">♡</span><span class="sl">喜好</span></button>
+      <button type="button" data-view="char"><span class="si">☺</span><span class="sl">角色</span></button>
       <button type="button" data-view="me"><span class="si">⚙</span><span class="sl">我们</span></button>
     </div>
   </div>
@@ -667,7 +730,7 @@ var API = 'https://api.github.com';
 var FILE_NAME = 'couple.json';
 var LS_CFG = 'lp_cfg_v1';
 var LS_DATA = 'lp_data_v1';
-var BUILD_ID = 'b20261109-2100';
+var BUILD_ID = 'b20261109-2330';
 
 var cfg = null;
 var data = null;
@@ -712,6 +775,7 @@ function defaultData(){
     mealsCleanTs : 0,
     likes : [],
     cycle : { records : [], dur : 5 },
+    char : { name : '小绒', face : '🐱', style : '温柔', lines : [], hasAvatar : false, ts : 0 },
     games : { quiz : null, cards : [], wheel : null },
     moods : {}
   };
@@ -726,6 +790,8 @@ function loadLocal(){
   if(!data.photos) data.photos = [];
   if(!data.meals) data.meals = [];
   if(!data.likes) data.likes = [];
+  if(!data.char) data.char = { name : '小绒', face : '🐱', style : '温柔', lines : [], hasAvatar : false, ts : 0 };
+  if(!data.char.lines) data.char.lines = [];
   if(!data.cycle || !data.cycle.records) data.cycle = { records : [], dur : 5 };
   if(!data.games) data.games = {};
   if(!data.games.cards) data.games.cards = [];
@@ -801,6 +867,18 @@ function mergeRemote(remote){
   data.photos = mergeList(data.photos, remote.photos);
   data.meals = mergeList(data.meals, remote.meals);
   data.likes = mergeList(data.likes, remote.likes);
+  if(remote.char){
+    var lc = data.char || {}, rc = remote.char;
+    var newer = (rc.ts || 0) > (lc.ts || 0);
+    data.char = {
+      name : newer ? (rc.name || lc.name) : (lc.name || rc.name),
+      face : newer ? (rc.face || lc.face) : (lc.face || rc.face),
+      style : newer ? (rc.style || lc.style) : (lc.style || rc.style),
+      hasAvatar : !!rc.hasAvatar,
+      lines : mergeList(lc.lines || [], rc.lines || []),
+      ts : Math.max(rc.ts || 0, lc.ts || 0)
+    };
+  }
   if(remote.cycle && remote.cycle.records){
     data.cycle = data.cycle || { records : [], dur : 5 };
     data.cycle.records = mergeList(data.cycle.records, remote.cycle.records);
@@ -948,6 +1026,7 @@ function render(){
   }
   if($('#view-cycle') && !$('#view-cycle').classList.contains('hidden')) renderCycle();
   if($('#view-like') && !$('#view-like').classList.contains('hidden')) renderLikes();
+  renderChar();
   if($('#view-games') && !$('#view-games').classList.contains('hidden')) renderGames();
 }
 
@@ -1937,8 +2016,221 @@ function addLikeItem(kind){
   toast('加好了');
 }
 
+/* ---------- 自定义角色 ---------- */
+var CHAR_STYLES = ['温柔', '毒舌', '沙雕', '高冷', '粘人'];
+var CHAR_FACES = ['🐱', '🐻', '🐰', '🦊', '🐨', '🌟'];
+var CHAR_LIB = {
+  温柔 : ['今天也要好好吃饭呀。', '累的话就先躺一会儿，别硬撑。', '我在的，不用自己扛。', '天冷了，记得多穿一件。', '想你了，轻轻的。', '没什么事，就是想跟你说句话。'],
+  毒舌 : ['又熬夜？皮肤不要了是吧。', '别装酷了，明明想她想得要命。', '行吧，今天算你乖。', '少废话，去哄她。', '你们俩磨叽得挺可爱。', '再气她，我就咬你。'],
+  沙雕 : ['我在你家门口……开玩笑的。', '今天的 KPI 是：笑一次。', '报告！这里有人偷偷想对象。', '别看我，我只是一坨毛。', '电量不足，请用抱抱充电。', '今天也要做快乐小狗。'],
+  高冷 : ['嗯。', '知道了。', '……看她。', '有空再说。', '别闹。', '今天还行。'],
+  粘人 : ['你怎么才来呀！', '再陪我一会儿嘛。', '不许走，先看我一眼。', '我今天一直等你。', '抱一下再说话。', '你就是我的全部待办了。']
+};
+var charAv = '';
+
+function defaultChar(){
+  return { name : '小绒', face : '🐱', style : '温柔', lines : [], hasAvatar : false, ts : 0 };
+}
+function charObj(){
+  if(!data.char) data.char = defaultChar();
+  if(!data.char.lines) data.char.lines = [];
+  return data.char;
+}
+function otherRole(){ return myRole() === 'A' ? 'B' : 'A'; }
+
+function saveCharAvatar(dataUrl){
+  return savePhotoFile('char_avatar.txt', dataUrl).then(function(){
+    charAv = dataUrl;
+    charObj().hasAvatar = true;
+  });
+}
+
+function loadCharAvatar(force){
+  var c = charObj();
+  if(!c.hasAvatar) return Promise.resolve(false);
+  if(charAv && !force) return Promise.resolve(true);
+  if(!cfg || !cfg.pid) return Promise.resolve(false);
+  return gh('/gists/' + cfg.pid).then(function(g){
+    var f = (g.files || {})['char_avatar.txt'];
+    if(f && f.content && f.content.indexOf('data:image') === 0){
+      charAv = f.content;
+      renderChar();
+    }
+    return true;
+  });
+}
+
+function charSpecial(){
+  var s = cycleStats();
+  if(s.has && s.dayNo <= s.dur) return '粥、热水、暖宝宝，还有你一句“我在”，都能让她好受点。';
+  var pm = data.moods && data.moods[otherRole()];
+  if(pm && (pm.text === '有点难过' || pm.text === '睡不着')) return '她今天不太开心，先别讲道理，抱抱她。';
+  var days = Math.floor((Date.now() - parseDate(data.meta.start || '2026-01-01').getTime()) / 86400000);
+  if(days > 0 && days % 100 === 0) return '今天是第 ' + days + ' 天，你们已经一起走了很久。';
+  return '';
+}
+
+function sayLine(){
+  var c = charObj();
+  var txt = '', i = 0, cur = $('#homeSay') ? $('#homeSay').textContent : '';
+  do{
+    var sp = charSpecial();
+    if(sp && Math.random() < 0.7){
+      txt = sp;
+    }else if(c.lines.length && Math.random() < 0.55){
+      txt = c.lines[Math.floor(Math.random() * c.lines.length)].text;
+    }else{
+      var lib = CHAR_LIB[c.style] || CHAR_LIB['温柔'];
+      txt = lib[Math.floor(Math.random() * lib.length)];
+    }
+    i++;
+  }while(txt === cur && i < 3);
+  if($('#homeSay')) $('#homeSay').textContent = txt;
+  if($('#charSay')) $('#charSay').textContent = txt;
+}
+
+function renderChar(){
+  var c = charObj();
+  var av = (c.hasAvatar && charAv) ? charAv : '';
+  ['homeFace', 'charFace'].forEach(function(id){
+    var el = $('#' + id);
+    if(!el) return;
+    if(av) el.innerHTML = '<img src="' + av + '" alt="">';
+    else el.textContent = c.face || '🐱';
+  });
+
+  if($('#homeCharName')) $('#homeCharName').textContent = c.name || '小绒';
+  if($('#charName') && document.activeElement !== $('#charName')) $('#charName').value = c.name || '';
+  if($('#lineCount')) $('#lineCount').textContent = c.lines.length ? '· 共 ' + c.lines.length + ' 句' : '';
+
+  var faceRow = $('#faceRow');
+  if(faceRow){
+    faceRow.innerHTML = '';
+    if(av){
+      var chip = document.createElement('div');
+      chip.className = 'face-opt on';
+      chip.innerHTML = '<img src="' + av + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
+      faceRow.appendChild(chip);
+    }
+    CHAR_FACES.forEach(function(f){
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'face-opt' + (!av && c.face === f ? ' on' : '');
+      b.textContent = f;
+      b.addEventListener('click', function(){
+        act(function(){
+          charObj().face = f;
+          charObj().hasAvatar = false;
+          charObj().ts = Date.now();
+        });
+        charAv = '';
+        renderChar();
+      });
+      faceRow.appendChild(b);
+    });
+  }
+
+  var styleRow = $('#styleRow');
+  if(styleRow){
+    styleRow.innerHTML = '';
+    CHAR_STYLES.forEach(function(st){
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'style-opt' + (c.style === st ? ' on' : '');
+      b.textContent = st;
+      b.addEventListener('click', function(){
+        act(function(){
+          charObj().style = st;
+          charObj().ts = Date.now();
+        });
+        sayLine();
+        renderChar();
+      });
+      styleRow.appendChild(b);
+    });
+  }
+
+  var list = $('#lineList');
+  if(list){
+    list.innerHTML = '';
+    if(!c.lines.length){
+      var e = document.createElement('div');
+      e.className = 'lk-empty';
+      e.textContent = '还没自己写过，它现在只说系统自带的话。';
+      list.appendChild(e);
+    }
+    c.lines.forEach(function(it){
+      var el = document.createElement('div');
+      el.className = 'lk-item';
+      var tx = document.createElement('div');
+      tx.className = 'tx';
+      tx.textContent = it.text;
+      var by = document.createElement('div');
+      by.className = 'by';
+      by.textContent = nameOf(it.role).slice(0, 3);
+      var x = document.createElement('button');
+      x.type = 'button';
+      x.className = 'x';
+      x.textContent = '✕';
+      x.addEventListener('click', function(){
+        act(function(){
+          data.char.lines = data.char.lines.filter(function(y){ return y.id !== it.id; });
+        });
+        renderChar();
+      });
+      el.appendChild(tx);
+      el.appendChild(by);
+      el.appendChild(x);
+      list.appendChild(el);
+    });
+  }
+}
+
+$('#homeTalk').addEventListener('click', sayLine);
+$('#charSay').addEventListener('click', sayLine);
+$('#charFace').addEventListener('click', sayLine);
+
+$('#charName').addEventListener('change', function(){
+  var v = this.value.trim() || '小绒';
+  act(function(){
+    charObj().name = v;
+    charObj().ts = Date.now();
+  });
+  renderChar();
+  toast('名字改成「' + v + '」');
+});
+
+$('#charUpload').addEventListener('click', function(){ $('#charFile').click(); });
+$('#charFile').addEventListener('change', function(e){
+  var f = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if(!f) return;
+  compressImage(f, 320, 0.55, 90000).then(function(url){
+    return saveCharAvatar(url).then(function(){
+      data.char.ts = Date.now();
+      saveLocal();
+      renderChar();
+      commit().catch(function(err){ toast(err.message); });
+      toast('形象换好啦');
+    });
+  }).catch(function(err){ toast(err.message || '换图失败'); });
+});
+
+$('#lineAdd').addEventListener('click', function(){
+  var v = $('#lineInput').value.trim();
+  if(!v){ toast('先写一句'); return; }
+  var item = { id : uid(), role : myRole(), text : v.slice(0, 30), ts : Date.now() };
+  act(function(){
+    charObj().lines.unshift(item);
+    charObj().ts = Date.now();
+  });
+  $('#lineInput').value = '';
+  renderChar();
+  toast('它学会了');
+});
+
 /* ---------- 视图切换 ---------- */
-var MENU_VIEWS = ['note', 'games', 'cycle', 'like', 'me'];
+var MENU_VIEWS = ['note', 'games', 'cycle', 'like', 'char', 'me'];
 
 function openSheet(){ $('#sheet').classList.add('show'); $('#sheetMask').classList.add('show'); }
 function closeSheet(){ $('#sheet').classList.remove('show'); $('#sheetMask').classList.remove('show'); }
@@ -1965,6 +2257,7 @@ function showView(name){
   if(name === 'games'){ renderGames(); }
   if(name === 'cycle'){ renderCycle(); }
   if(name === 'like'){ renderLikes(); }
+  if(name === 'char'){ renderChar(); loadCharAvatar().then(renderChar).catch(function(e){ toast(e.message); }); }
   window.scrollTo(0, 0);
 }
 
