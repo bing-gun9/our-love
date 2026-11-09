@@ -63,17 +63,7 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
 .hidden{display:none!important;}
 
 /* ---------- 一起看 / 养成 ---------- */
-.wt-row{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--line);}
-.wt-row:last-child{border-bottom:0;}
-.wt-main{flex:1;min-width:0;}
-.wt-title{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .wt-sub{font-size:11.5px;color:var(--muted);margin-top:3px;}
-.wt-k{display:inline-block;font-size:10.5px;padding:2px 7px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--muted);margin-right:6px;font-family:inherit;line-height:1.5;}
-.wt-k.on{border-color:rgba(255,159,196,.7);color:#ffd0e2;background:rgba(255,159,196,.12);}
-.wt-pm{width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:rgba(255,255,255,.06);color:#fff;font-size:15px;cursor:pointer;flex:0 0 30px;line-height:1;}
-.wt-x{border:0;background:none;color:rgba(244,238,255,.35);font-size:14px;cursor:pointer;padding:0 2px;flex:0 0 auto;}
-.wt-now{display:flex;align-items:center;gap:12px;padding:4px 0 2px;}
-.wt-clock{font-size:20px;font-weight:700;color:#ffd0e2;font-variant-numeric:tabular-nums;}
 .bond-bar{height:6px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden;margin:8px 0 4px;}
 .bond-bar i{display:block;height:100%;background:linear-gradient(90deg,#ffd6a6,#ff9ec4);transition:width .3s;}
 .bond-row{display:flex;gap:8px;margin-top:12px;}
@@ -614,7 +604,7 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
       <div class="set-row"><span>最近同步</span><b id="syncTime">-</b></div>
       <div class="set-row"><span>我的身份</span><b id="roleTxt">-</b></div>
       <div class="set-row"><span>空间编号</span><b id="gistId" style="font-size:11px">-</b></div>
-      <div class="set-row"><span>版本</span><b>v2.0</b></div>
+      <div class="set-row"><span>版本</span><b>v2.1</b></div>
       <div style="display:flex;gap:10px;margin-top:14px">
         <button class="btn small ghost" id="btnSync" style="flex:1">立即同步</button>
         <button class="btn small ghost" id="btnInvite" style="flex:1">复制邀请码</button>
@@ -746,30 +736,6 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
   </div>
 
 
-  <!-- 一起看 -->
-  <div id="view-watch" class="view wrap hidden">
-    <p class="sec-title">现在一起看</p>
-    <div class="card">
-      <div id="wtNowBox"></div>
-      <div style="display:flex;gap:10px;margin-top:12px">
-        <button class="btn small" id="wtStart" type="button" style="flex:1">我们开始看了</button>
-        <button class="btn small ghost" id="wtStop" type="button" style="flex:1">结束这一次</button>
-      </div>
-      <p class="tip">网页里放不了别人的视频，你俩各自打开同一部片子，点「开始」记下时间，就知道对方看了多久、看到哪儿。</p>
-    </div>
-
-    <p class="sec-title">想看的片子</p>
-    <div class="card">
-      <div class="cyc-add">
-        <input id="wtTitle" maxlength="24" placeholder="片名，比如 消失的她">
-        <button class="btn small" id="wtAdd" type="button">加</button>
-      </div>
-      <div class="face-row" id="wtKinds" style="margin-top:10px"></div>
-      <div id="wtList"></div>
-    </div>
-    <p class="tip">点左边的「+1」加一集（电影就是加一分钟），点胶囊切换想看 / 在看 / 看完，两边的进度会同步。</p>
-    <div style="height:20px"></div>
-  </div>
   <div id="sheetMask" class="sheet-mask"></div>
   <div id="sheet" class="sheet">
     <div class="sheet-grab"></div>
@@ -779,7 +745,6 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
       <button type="button" data-view="cycle"><span class="si">❀</span><span class="sl">生理期</span></button>
       <button type="button" data-view="like"><span class="si">♡</span><span class="sl">喜好</span></button>
       <button type="button" data-view="char"><span class="si">☺</span><span class="sl">角色</span></button>
-      <button type="button" data-view="watch"><span class="si">▤</span><span class="sl">一起看</span></button>
       <button type="button" data-view="me"><span class="si">⚙</span><span class="sl">我们</span></button>
     </div>
   </div>
@@ -803,7 +768,7 @@ var API = 'https://api.github.com';
 var FILE_NAME = 'couple.json';
 var LS_CFG = 'lp_cfg_v1';
 var LS_DATA = 'lp_data_v1';
-var BUILD_ID = 'b20261110-0010';
+var BUILD_ID = 'b20261110-0130';
 
 var cfg = null;
 var data = null;
@@ -1029,15 +994,6 @@ function mergeRemote(remote){
       }
     }
   }
-  if(remote.watch){
-    data.watch = data.watch || { items : [], now : null };
-    data.watch.items = mergeList(data.watch.items || [], remote.watch.items || []);
-    var ln = data.watch.now, rn = remote.watch.now;
-    if(rn && (!ln || (rn.start || 0) > (ln.start || 0))) data.watch.now = rn;
-    if(!rn && ln && remote.watch.items && remote.watch.items.length && remote.watch.items.some(function(it){ return it.id === ln.id; }) === false){
-      data.watch.now = null;
-    }
-  }
   if(remote.moods){
     ['A', 'B'].forEach(function(k){
       var l = data.moods[k], r = remote.moods[k];
@@ -1160,7 +1116,6 @@ function render(){
   if($('#view-cycle') && !$('#view-cycle').classList.contains('hidden')) renderCycle();
   if($('#view-like') && !$('#view-like').classList.contains('hidden')) renderLikes();
   renderChar();
-  if($('#view-watch') && !$('#view-watch').classList.contains('hidden')) renderWatch();
   if($('#view-games') && !$('#view-games').classList.contains('hidden')) renderGames();
 }
 
@@ -2506,132 +2461,6 @@ function renderBond(){
   if($("#homeLv")) $("#homeLv").textContent = "🔥 Lv " + lv;
 }
 
-/* ---------- 一起看 ---------- */
-var WATCH_KINDS = ["电影", "剧", "番"];
-var WATCH_ST = { want : "想看", doing : "在看", done : "看完" };
-var wtKind = "电影";
-var watchTimer = null;
-
-function watchObj(){
-  if(!data.watch) data.watch = { items : [], now : null };
-  if(!data.watch.items) data.watch.items = [];
-  return data.watch;
-}
-function watchElapsed(now){
-  var ms = Date.now() - now.start;
-  if(ms < 0) ms = 0;
-  var h = Math.floor(ms / 3600000), m = Math.floor(ms / 60000) % 60, sec = Math.floor(ms / 1000) % 60;
-  return (h ? h + ":" : "") + pad(m) + ":" + pad(sec);
-}
-function wtEpText(it){
-  if(!it.ep) return "还没开始";
-  return it.kind === "电影" ? (it.ep + " 分钟") : ("第 " + it.ep + " 话");
-}
-
-function renderWatch(){
-  var w = watchObj(), box = $("#wtNowBox");
-  if(box){
-    box.innerHTML = "";
-    if(w.now){
-      var row = document.createElement("div");
-      row.className = "wt-now";
-      var cl = document.createElement("div");
-      cl.innerHTML = '<div class="wt-clock" id="wtClock">' + watchElapsed(w.now) + '</div>' +
-        '<div class="wt-sub">' + esc(w.now.title) + " · " + esc(nameOf(w.now.by)) + " 点的开始</div>";
-      row.appendChild(cl);
-      box.appendChild(row);
-    }else{
-      var hint = document.createElement("p");
-      hint.className = "tip";
-      hint.style.margin = "0";
-      hint.textContent = "现在没有在看的。先在下面把某部切成「在看」，再点开始。";
-      box.appendChild(hint);
-    }
-  }
-
-  if(watchTimer){ clearInterval(watchTimer); watchTimer = null; }
-  if(w.now && $("#view-watch") && !$("#view-watch").classList.contains("hidden")){
-    watchTimer = setInterval(function(){
-      var el = $("#wtClock");
-      if(el) el.textContent = watchElapsed(w.now);
-    }, 1000);
-  }
-
-  var kr = $("#wtKinds");
-  if(kr){
-    kr.innerHTML = "";
-    WATCH_KINDS.forEach(function(k){
-      var b = document.createElement("button");
-      b.type = "button";
-      b.className = "style-opt" + (wtKind === k ? " on" : "");
-      b.textContent = k;
-      b.addEventListener("click", function(){ wtKind = k; renderWatch(); });
-      kr.appendChild(b);
-    });
-  }
-
-  var list = $("#wtList");
-  if(list){
-    list.innerHTML = "";
-    if(!w.items.length){
-      var e = document.createElement("p");
-      e.className = "tip";
-      e.textContent = "还没有片子。加一部想一起看的，比如你们一直说要看的那部。";
-      list.appendChild(e);
-    }
-    w.items.forEach(function(it){
-      var row = document.createElement("div");
-      row.className = "wt-row";
-      var main = document.createElement("div");
-      main.className = "wt-main";
-      var t = document.createElement("div");
-      t.className = "wt-title";
-      t.textContent = it.title;
-      var sub = document.createElement("div");
-      sub.className = "wt-sub";
-      sub.textContent = it.kind + " · " + wtEpText(it) + " · " + nameOf(it.by);
-      main.appendChild(t);
-      main.appendChild(sub);
-
-      var pill = document.createElement("button");
-      pill.type = "button";
-      pill.className = "wt-k" + (it.status === "doing" ? " on" : "");
-      pill.textContent = WATCH_ST[it.status] || "想看";
-      pill.style.cursor = "pointer";
-      pill.addEventListener("click", function(){
-        var next = it.status === "want" ? "doing" : (it.status === "doing" ? "done" : "want");
-        act(function(){ it.status = next; it.ts = Date.now(); });
-        toast("改成「" + WATCH_ST[next] + "」");
-      });
-
-      var plus = document.createElement("button");
-      plus.type = "button";
-      plus.className = "wt-pm";
-      plus.textContent = "+";
-      plus.addEventListener("click", function(){
-        act(function(){ it.ep = (it.ep || 0) + 1; it.ts = Date.now(); });
-      });
-
-      var del = document.createElement("button");
-      del.type = "button";
-      del.className = "wt-x";
-      del.textContent = "✕";
-      del.addEventListener("click", function(){
-        act(function(){
-          data.watch.items = data.watch.items.filter(function(y){ return y.id !== it.id; });
-          if(data.watch.now && data.watch.now.id === it.id) data.watch.now = null;
-        });
-      });
-
-      row.appendChild(main);
-      row.appendChild(pill);
-      row.appendChild(plus);
-      row.appendChild(del);
-      list.appendChild(row);
-    });
-  }
-}
-
 /* ---------- 石头剪刀布 ---------- */
 var RPS_ICON = { r : "✊", s : "✌", p : "✋" };
 var RPS_NAME = { r : "石头", s : "剪刀", p : "布" };
@@ -2759,28 +2588,6 @@ $("#bondFeed").addEventListener("click", function(){ bondDo("feeds", 1, 10, "它
 $("#bondPat").addEventListener("click", function(){ bondDo("pats", 3, 4, "它被顺毛了"); });
 $("#bondPlay").addEventListener("click", function(){ bondDo("plays", 2, 6, "它玩得很疯"); });
 
-$("#wtAdd").addEventListener("click", function(){
-  var v = $("#wtTitle").value.trim();
-  if(!v){ toast("先写片名"); return; }
-  var item = { id : uid(), title : v, kind : wtKind, ep : 0, status : "want", by : myRole(), ts : Date.now() };
-  act(function(){ watchObj().items.unshift(item); });
-  $("#wtTitle").value = "";
-  renderWatch();
-  toast("加好了");
-});
-$("#wtStart").addEventListener("click", function(){
-  var w = watchObj();
-  var doing = null;
-  w.items.forEach(function(it){ if(!doing && it.status === "doing") doing = it; });
-  if(!doing){ toast("先把某部切成「在看」"); return; }
-  act(function(){ data.watch.now = { id : doing.id, title : doing.title, start : Date.now(), by : myRole() }; });
-  renderWatch();
-  toast("开始计时");
-});
-$("#wtStop").addEventListener("click", function(){
-  act(function(){ data.watch.now = null; });
-  renderWatch();
-});
 $("#qaSave").addEventListener("click", function(){
   var v = $("#qaInput").value.trim();
   if(!v){ toast("先写点东西"); return; }
@@ -2794,7 +2601,7 @@ $("#qaSave").addEventListener("click", function(){
 });
 
 /* ---------- 视图切换 ---------- *//* ---------- 视图切换 ---------- */
-var MENU_VIEWS = ['note', 'games', 'watch', 'cycle', 'like', 'char', 'me'];
+var MENU_VIEWS = ['note', 'games', 'cycle', 'like', 'char', 'me'];
 
 function openSheet(){ $('#sheet').classList.add('show'); $('#sheetMask').classList.add('show'); }
 function closeSheet(){ $('#sheet').classList.remove('show'); $('#sheetMask').classList.remove('show'); }
@@ -2822,7 +2629,6 @@ function showView(name){
   if(name === 'cycle'){ renderCycle(); }
   if(name === 'like'){ renderLikes(); }
   if(name === 'char'){ renderChar(); loadCharAvatar().then(renderChar).catch(function(e){ toast(e.message); }); }
-  if(name === 'watch'){ renderWatch(); }
   window.scrollTo(0, 0);
 }
 
