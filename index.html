@@ -62,6 +62,28 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
 .kicker{font-size:12px;letter-spacing:.18em;color:var(--pink-soft);opacity:.9;margin:0 0 10px;}
 .hidden{display:none!important;}
 
+/* ---------- 一起看 / 养成 ---------- */
+.wt-row{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--line);}
+.wt-row:last-child{border-bottom:0;}
+.wt-main{flex:1;min-width:0;}
+.wt-title{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.wt-sub{font-size:11.5px;color:var(--muted);margin-top:3px;}
+.wt-k{display:inline-block;font-size:10.5px;padding:2px 7px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--muted);margin-right:6px;font-family:inherit;line-height:1.5;}
+.wt-k.on{border-color:rgba(255,159,196,.7);color:#ffd0e2;background:rgba(255,159,196,.12);}
+.wt-pm{width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:rgba(255,255,255,.06);color:#fff;font-size:15px;cursor:pointer;flex:0 0 30px;line-height:1;}
+.wt-x{border:0;background:none;color:rgba(244,238,255,.35);font-size:14px;cursor:pointer;padding:0 2px;flex:0 0 auto;}
+.wt-now{display:flex;align-items:center;gap:12px;padding:4px 0 2px;}
+.wt-clock{font-size:20px;font-weight:700;color:#ffd0e2;font-variant-numeric:tabular-nums;}
+.bond-bar{height:6px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden;margin:8px 0 4px;}
+.bond-bar i{display:block;height:100%;background:linear-gradient(90deg,#ffd6a6,#ff9ec4);transition:width .3s;}
+.bond-row{display:flex;gap:8px;margin-top:12px;}
+.bond-btn{flex:1;padding:11px 0;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--text);font-family:inherit;font-size:12.5px;cursor:pointer;}
+.bond-btn:active{transform:scale(.97);}
+.char-lv{font-style:normal;font-size:10.5px;padding:1px 6px;border-radius:999px;background:rgba(255,159,196,.18);border:1px solid rgba(255,159,196,.5);margin-left:6px;vertical-align:1px;color:#ffd0e2;}
+.rps-row{display:flex;gap:10px;}
+.rps-btn{flex:1;padding:14px 0;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.05);color:#fff;font-size:24px;cursor:pointer;line-height:1;}
+.rps-btn.on{border-color:rgba(255,159,196,.8);background:rgba(255,159,196,.16);}
+.rps-out{font-size:12.5px;color:var(--muted);line-height:1.9;}
 /* ---------- 第一次设置 ---------- */
 #setup{
   min-height:100vh;display:flex;flex-direction:column;justify-content:center;
@@ -167,8 +189,8 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
 .sheet{position:fixed;left:0;right:0;bottom:0;z-index:41;background:rgba(14,18,38,.99);border-top:1px solid var(--line);border-radius:20px 20px 0 0;padding:6px 16px calc(18px + env(safe-area-inset-bottom));transform:translateY(115%);transition:transform .26s cubic-bezier(.22,.8,.3,1);}
 .sheet.show{transform:translateY(0);}
 .sheet-grab{width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,.22);margin:6px auto 14px;}
-.sheet-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
-.sheet-grid button{background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:14px;color:var(--text);font-family:inherit;padding:13px 4px;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;}
+.sheet-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;}
+.sheet-grid button{background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:14px;color:var(--text);font-family:inherit;padding:11px 3px;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;}
 .sheet-grid button:active{background:rgba(255,255,255,.13);}
 .sheet-grid .si{font-size:19px;color:var(--pink-soft);}
 .sheet-grid .sl{font-size:12.5px;color:var(--muted);}
@@ -465,7 +487,7 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
     <div class="char-card" id="homeChar">
       <div class="char-face" id="homeFace">🐱</div>
       <div class="char-talk" id="homeTalk">
-        <p class="char-name" id="homeCharName">小绒</p>
+        <p class="char-name"><span id="homeCharName">小绒</span><i class="char-lv" id="homeLv">🔥 Lv 1</i></p>
         <p class="bubble" id="homeSay">点我一下，我有话说</p>
       </div>
     </div>
@@ -557,6 +579,19 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
       <div id="wheelBox"></div>
     </div>
 
+    <p class="sec-title">石头剪刀布</p>
+    <div class="card">
+      <div class="rps-row" id="rpsRow"></div>
+      <div class="rps-out" id="rpsOut" style="margin-top:12px"></div>
+    </div>
+
+    <p class="sec-title">今日一问</p>
+    <div class="card">
+      <div class="qz-q" id="qaQ"></div>
+      <textarea id="qaInput" maxlength="200" placeholder="写下来，TA 刷新就能看到…" style="min-height:64px;margin-top:10px"></textarea>
+      <div style="display:flex;justify-content:flex-end;margin-top:8px"><button class="btn small" id="qaSave" type="button">存下来</button></div>
+      <div id="qaOther" style="margin-top:12px"></div>
+    </div>
     <p class="tip">这些都会同步：TA 那边几秒后就能看到你抽到什么、转到了谁。每天换一道默契题，答完自动累加默契次数。</p>
     <div style="height:20px"></div>
   </div>
@@ -579,7 +614,7 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
       <div class="set-row"><span>最近同步</span><b id="syncTime">-</b></div>
       <div class="set-row"><span>我的身份</span><b id="roleTxt">-</b></div>
       <div class="set-row"><span>空间编号</span><b id="gistId" style="font-size:11px">-</b></div>
-      <div class="set-row"><span>版本</span><b>v1.9</b></div>
+      <div class="set-row"><span>版本</span><b>v2.0</b></div>
       <div style="display:flex;gap:10px;margin-top:14px">
         <button class="btn small ghost" id="btnSync" style="flex:1">立即同步</button>
         <button class="btn small ghost" id="btnInvite" style="flex:1">复制邀请码</button>
@@ -687,6 +722,18 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
       </div>
     </div>
 
+    <p class="sec-title">它和你们的亲密度</p>
+    <div class="card">
+      <div class="set-row"><span>等级</span><b id="bondLv">Lv 1</b></div>
+      <div class="bond-bar"><i id="bondBar" style="width:0%"></i></div>
+      <div class="wt-sub" id="bondTip">还差 100 点升到下一级</div>
+      <div class="bond-row">
+        <button class="bond-btn" id="bondFeed" type="button">喂一口</button>
+        <button class="bond-btn" id="bondPat" type="button">顺顺毛</button>
+        <button class="bond-btn" id="bondPlay" type="button">陪它玩</button>
+      </div>
+      <p class="tip">每人每天能喂 1 次、顺毛 3 次、陪玩 2 次。喂得越勤，它说话越黏、越会撒娇。</p>
+    </div>
     <p class="sec-title">它自己会说的话 <span id="lineCount" style="color:rgba(244,238,255,.45)"></span></p>
     <div class="card">
       <div class="cyc-add">
@@ -699,6 +746,30 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
   </div>
 
 
+  <!-- 一起看 -->
+  <div id="view-watch" class="view wrap hidden">
+    <p class="sec-title">现在一起看</p>
+    <div class="card">
+      <div id="wtNowBox"></div>
+      <div style="display:flex;gap:10px;margin-top:12px">
+        <button class="btn small" id="wtStart" type="button" style="flex:1">我们开始看了</button>
+        <button class="btn small ghost" id="wtStop" type="button" style="flex:1">结束这一次</button>
+      </div>
+      <p class="tip">网页里放不了别人的视频，你俩各自打开同一部片子，点「开始」记下时间，就知道对方看了多久、看到哪儿。</p>
+    </div>
+
+    <p class="sec-title">想看的片子</p>
+    <div class="card">
+      <div class="cyc-add">
+        <input id="wtTitle" maxlength="24" placeholder="片名，比如 消失的她">
+        <button class="btn small" id="wtAdd" type="button">加</button>
+      </div>
+      <div class="face-row" id="wtKinds" style="margin-top:10px"></div>
+      <div id="wtList"></div>
+    </div>
+    <p class="tip">点左边的「+1」加一集（电影就是加一分钟），点胶囊切换想看 / 在看 / 看完，两边的进度会同步。</p>
+    <div style="height:20px"></div>
+  </div>
   <div id="sheetMask" class="sheet-mask"></div>
   <div id="sheet" class="sheet">
     <div class="sheet-grab"></div>
@@ -708,6 +779,7 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
       <button type="button" data-view="cycle"><span class="si">❀</span><span class="sl">生理期</span></button>
       <button type="button" data-view="like"><span class="si">♡</span><span class="sl">喜好</span></button>
       <button type="button" data-view="char"><span class="si">☺</span><span class="sl">角色</span></button>
+      <button type="button" data-view="watch"><span class="si">▤</span><span class="sl">一起看</span></button>
       <button type="button" data-view="me"><span class="si">⚙</span><span class="sl">我们</span></button>
     </div>
   </div>
@@ -731,7 +803,7 @@ var API = 'https://api.github.com';
 var FILE_NAME = 'couple.json';
 var LS_CFG = 'lp_cfg_v1';
 var LS_DATA = 'lp_data_v1';
-var BUILD_ID = 'b20261109-2350';
+var BUILD_ID = 'b20261110-0010';
 
 var cfg = null;
 var data = null;
@@ -844,6 +916,24 @@ function mergeList(localArr, remoteArr){
   out.sort(function(a, b){ return (b.ts || 0) - (a.ts || 0); });
   return out;
 }
+function mergeDayRec(l, r){
+  if(!l) return r;
+  if(!r) return l;
+  if((r.day || "") > (l.day || "")) return r;
+  if((l.day || "") < (r.day || "")) return l;
+  return (r.n || 0) > (l.n || 0) ? r : l;
+}
+function mergeBond(l, r){
+  if(!r) return l;
+  if(!l) return r;
+  var out = { exp : Math.max(l.exp || 0, r.exp || 0), feeds : {}, pats : {}, plays : {}, ts : Math.max(l.ts || 0, r.ts || 0) };
+  ["feeds", "pats", "plays"].forEach(function(k){
+    ["A", "B"].forEach(function(role){
+      out[k][role] = mergeDayRec((l[k] || {})[role], (r[k] || {})[role]);
+    });
+  });
+  return out;
+}
 function mergeRemote(remote){
   if(!remote) return;
   if(remote.meta){
@@ -879,6 +969,7 @@ function mergeRemote(remote){
       style : newer ? (rc.style || lc.style) : (lc.style || rc.style),
       hasAvatar : !!rc.hasAvatar,
       lines : mergeList(lc.lines || [], rc.lines || []),
+      bond : mergeBond(lc.bond, rc.bond),
       ts : Math.max(rc.ts || 0, lc.ts || 0)
     };
   }
@@ -899,13 +990,52 @@ function mergeRemote(remote){
         lg.quiz.ts = Math.max(lq.ts || 0, rg.quiz.ts || 0);
       }
     }
-    lg.cards = mergeList(lg.cards, rg.cards);
+    lg.cards = mergeList(lg.cards, rg.cards);
+    if(rg.rps){
+      var lr = lg.rps || { round : { A : "", B : "", n : 1 }, score : { A : 0, B : 0 }, hist : [] };
+      if(!lr.round) lr.round = { A : "", B : "", n : 1 };
+      if(!lr.hist) lr.hist = [];
+      ["A", "B"].forEach(function(role){
+        if((rg.rps.round || {})[role] && !lr.round[role]) lr.round[role] = rg.rps.round[role];
+        lr.score[role] = Math.max(lr.score[role] || 0, (rg.rps.score || {})[role] || 0);
+      });
+      if(((rg.rps.round || {}).n || 0) > (lr.round.n || 0)){
+        lr.round = { A : (rg.rps.round || {}).A || "", B : (rg.rps.round || {}).B || "", n : rg.rps.round.n };
+      }
+      (rg.rps.hist || []).forEach(function(h){
+        var has = false;
+        for(var i = 0; i < lr.hist.length; i++){ if(lr.hist[i].n === h.n){ has = true; break; } }
+        if(!has) lr.hist.push(h);
+      });
+      lr.hist.sort(function(a, b){ return (b.n || 0) - (a.n || 0); });
+      if(lr.hist.length > 30) lr.hist = lr.hist.slice(0, 30);
+      lg.rps = lr;
+    }
+    if(rg.qa){
+      var lqb = lg.qa;
+      if(!lqb || (rg.qa.day || "") > (lqb.day || "")){
+        lg.qa = rg.qa;
+      }else if(lqb && rg.qa.day === lqb.day){
+        lqb.ansA = lqb.ansA || rg.qa.ansA || "";
+        lqb.ansB = lqb.ansB || rg.qa.ansB || "";
+        lqb.ts = Math.max(lqb.ts || 0, rg.qa.ts || 0);
+      }
+    }
     if(rg.wheel && (!lg.wheel || (rg.wheel.ts || 0) > (lg.wheel.ts || 0))) lg.wheel = rg.wheel;
     if(rg.hist){
       lg.hist = lg.hist || {};
       for(var k in rg.hist){
         if(rg.hist.hasOwnProperty(k) && !lg.hist[k]) lg.hist[k] = rg.hist[k];
       }
+    }
+  }
+  if(remote.watch){
+    data.watch = data.watch || { items : [], now : null };
+    data.watch.items = mergeList(data.watch.items || [], remote.watch.items || []);
+    var ln = data.watch.now, rn = remote.watch.now;
+    if(rn && (!ln || (rn.start || 0) > (ln.start || 0))) data.watch.now = rn;
+    if(!rn && ln && remote.watch.items && remote.watch.items.length && remote.watch.items.some(function(it){ return it.id === ln.id; }) === false){
+      data.watch.now = null;
     }
   }
   if(remote.moods){
@@ -1030,6 +1160,7 @@ function render(){
   if($('#view-cycle') && !$('#view-cycle').classList.contains('hidden')) renderCycle();
   if($('#view-like') && !$('#view-like').classList.contains('hidden')) renderLikes();
   renderChar();
+  if($('#view-watch') && !$('#view-watch').classList.contains('hidden')) renderWatch();
   if($('#view-games') && !$('#view-games').classList.contains('hidden')) renderGames();
 }
 
@@ -1767,6 +1898,8 @@ function renderGames(){
   renderQuiz();
   renderCards();
   renderWheel();
+  renderRps();
+  renderQA();
 }
 
 function esc(s){
@@ -2040,13 +2173,34 @@ var CHAR_LOOKS = [
   { id : 'c5', hair : '#4a3b6b', cloth : '#9ee6c8', cut : 'cap'  },
   { id : 'c6', hair : '#7a3b3b', cloth : '#ffb3a7', cut : 'bow'  },
   { id : 'c7', hair : '#3a2b3f', cloth : '#ffd7e6', cut : 'cat'  },
-  { id : 'c8', hair : '#5b4636', cloth : '#9ad4b0', cut : 'boy'  }
+  { id : 'c8', hair : '#5b4636', cloth : '#9ad4b0', cut : 'boy'  },
+  { id : 'c9', hair : '#b07a4f', cloth : '#b07a4f', cut : 'bear' }
 ];
+
+function bearSvg(){
+  var s = '';
+  s += '<circle cx="26" cy="21" r="11" fill="#b07a4f"/><circle cx="74" cy="21" r="11" fill="#b07a4f"/>';
+  s += '<circle cx="26" cy="21" r="5.5" fill="#eccaa6"/><circle cx="74" cy="21" r="5.5" fill="#eccaa6"/>';
+  s += '<circle cx="50" cy="43" r="27" fill="#b07a4f"/>';
+  s += '<path d="M30 100 q0 -22 20 -22 q20 0 20 22 z" fill="#b07a4f"/>';
+  s += '<ellipse cx="50" cy="88" rx="9" ry="7" fill="#f2d9b8"/>';
+  s += '<circle cx="29" cy="85" r="6" fill="#a06f46"/><circle cx="71" cy="85" r="6" fill="#a06f46"/>';
+  s += '<circle cx="50" cy="49" r="21" fill="#ffe3d3"/>';
+  s += '<circle cx="41" cy="47" r="4" fill="#3a2430"/><circle cx="59" cy="47" r="4" fill="#3a2430"/>';
+  s += '<circle cx="42.3" cy="45.7" r="1.4" fill="#fff"/><circle cx="60.3" cy="45.7" r="1.4" fill="#fff"/>';
+  s += '<ellipse cx="50" cy="56" rx="9" ry="6.5" fill="#f9e2cc"/>';
+  s += '<ellipse cx="50" cy="53.5" rx="3.2" ry="2.2" fill="#6b4630"/>';
+  s += '<path d="M47 58 q3 3 6 0" stroke="#b07a6a" stroke-width="1.4" fill="none"/>';
+  s += '<ellipse cx="34" cy="55" rx="4.5" ry="2.6" fill="#ff9fa8" opacity=".5"/><ellipse cx="66" cy="55" rx="4.5" ry="2.6" fill="#ff9fa8" opacity=".5"/>';
+  s += '<path d="M26 43 q7 -14 24 -14 q17 0 24 14" stroke="#a06f46" stroke-width="2.4" fill="none"/>';
+  return '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">' + s + '</svg>';
+}
 
 function chibiSvg(lookId){
   var L = null;
   for(var i = 0; i < CHAR_LOOKS.length; i++){ if(CHAR_LOOKS[i].id === lookId) L = CHAR_LOOKS[i]; }
   if(!L) L = CHAR_LOOKS[0];
+  if(L.cut === 'bear') return bearSvg();
   var hair = L.hair, cloth = L.cloth, skin = '#ffe3d3', blush = '#ff9fa8';
   var s = '';
 
@@ -2189,6 +2343,7 @@ function renderChar(){
   if($('#homeCharName')) $('#homeCharName').textContent = c.name || '小绒';
   if($('#charName') && document.activeElement !== $('#charName')) $('#charName').value = c.name || '';
   if($('#lineCount')) $('#lineCount').textContent = c.lines.length ? '· 共 ' + c.lines.length + ' 句' : '';
+  renderBond();
 
   var faceRow = $('#faceRow');
   if(faceRow){
@@ -2317,8 +2472,329 @@ $('#lineAdd').addEventListener('click', function(){
   toast('它学会了');
 });
 
-/* ---------- 视图切换 ---------- */
-var MENU_VIEWS = ['note', 'games', 'cycle', 'like', 'char', 'me'];
+/* ---------- 养成 / 一起看 / 新游戏 ---------- */
+function bondObj(){
+  var c = charObj();
+  if(!c.bond) c.bond = { exp : 0, feeds : {}, pats : {}, plays : {}, ts : 0 };
+  if(!c.bond.feeds) c.bond.feeds = {};
+  if(!c.bond.pats) c.bond.pats = {};
+  if(!c.bond.plays) c.bond.plays = {};
+  return c.bond;
+}
+function bondLv(){ return 1 + Math.floor(bondObj().exp / 100); }
+function bondDo(kind, limit, exp, word){
+  var b = bondObj(), r = myRole(), t = todayStr(), oldLv = bondLv();
+  if(!b[kind][r]) b[kind][r] = { day : "", n : 0 };
+  var o = b[kind][r];
+  if(o.day !== t){ o.day = t; o.n = 0; }
+  if(o.n >= limit){ toast("今天已经够啦，明天再来"); return; }
+  o.n++;
+  b.exp += exp;
+  b.ts = Date.now();
+  charObj().ts = Date.now();
+  saveLocal();
+  renderChar();
+  var nl = bondLv();
+  toast(nl > oldLv ? ("升到 Lv " + nl + " 啦") : (word + " +" + exp));
+  commit().catch(function(e){ toast(e.message); });
+}
+function renderBond(){
+  var b = bondObj(), lv = bondLv(), rest = 100 - (b.exp % 100);
+  if($("#bondLv")) $("#bondLv").textContent = "Lv " + lv;
+  if($("#bondBar")) $("#bondBar").style.width = Math.min(100, b.exp % 100) + "%";
+  if($("#bondTip")) $("#bondTip").textContent = "还差 " + rest + " 点升到 Lv " + (lv + 1) + " · 累计 " + b.exp;
+  if($("#homeLv")) $("#homeLv").textContent = "🔥 Lv " + lv;
+}
+
+/* ---------- 一起看 ---------- */
+var WATCH_KINDS = ["电影", "剧", "番"];
+var WATCH_ST = { want : "想看", doing : "在看", done : "看完" };
+var wtKind = "电影";
+var watchTimer = null;
+
+function watchObj(){
+  if(!data.watch) data.watch = { items : [], now : null };
+  if(!data.watch.items) data.watch.items = [];
+  return data.watch;
+}
+function watchElapsed(now){
+  var ms = Date.now() - now.start;
+  if(ms < 0) ms = 0;
+  var h = Math.floor(ms / 3600000), m = Math.floor(ms / 60000) % 60, sec = Math.floor(ms / 1000) % 60;
+  return (h ? h + ":" : "") + pad(m) + ":" + pad(sec);
+}
+function wtEpText(it){
+  if(!it.ep) return "还没开始";
+  return it.kind === "电影" ? (it.ep + " 分钟") : ("第 " + it.ep + " 话");
+}
+
+function renderWatch(){
+  var w = watchObj(), box = $("#wtNowBox");
+  if(box){
+    box.innerHTML = "";
+    if(w.now){
+      var row = document.createElement("div");
+      row.className = "wt-now";
+      var cl = document.createElement("div");
+      cl.innerHTML = '<div class="wt-clock" id="wtClock">' + watchElapsed(w.now) + '</div>' +
+        '<div class="wt-sub">' + esc(w.now.title) + " · " + esc(nameOf(w.now.by)) + " 点的开始</div>";
+      row.appendChild(cl);
+      box.appendChild(row);
+    }else{
+      var hint = document.createElement("p");
+      hint.className = "tip";
+      hint.style.margin = "0";
+      hint.textContent = "现在没有在看的。先在下面把某部切成「在看」，再点开始。";
+      box.appendChild(hint);
+    }
+  }
+
+  if(watchTimer){ clearInterval(watchTimer); watchTimer = null; }
+  if(w.now && $("#view-watch") && !$("#view-watch").classList.contains("hidden")){
+    watchTimer = setInterval(function(){
+      var el = $("#wtClock");
+      if(el) el.textContent = watchElapsed(w.now);
+    }, 1000);
+  }
+
+  var kr = $("#wtKinds");
+  if(kr){
+    kr.innerHTML = "";
+    WATCH_KINDS.forEach(function(k){
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "style-opt" + (wtKind === k ? " on" : "");
+      b.textContent = k;
+      b.addEventListener("click", function(){ wtKind = k; renderWatch(); });
+      kr.appendChild(b);
+    });
+  }
+
+  var list = $("#wtList");
+  if(list){
+    list.innerHTML = "";
+    if(!w.items.length){
+      var e = document.createElement("p");
+      e.className = "tip";
+      e.textContent = "还没有片子。加一部想一起看的，比如你们一直说要看的那部。";
+      list.appendChild(e);
+    }
+    w.items.forEach(function(it){
+      var row = document.createElement("div");
+      row.className = "wt-row";
+      var main = document.createElement("div");
+      main.className = "wt-main";
+      var t = document.createElement("div");
+      t.className = "wt-title";
+      t.textContent = it.title;
+      var sub = document.createElement("div");
+      sub.className = "wt-sub";
+      sub.textContent = it.kind + " · " + wtEpText(it) + " · " + nameOf(it.by);
+      main.appendChild(t);
+      main.appendChild(sub);
+
+      var pill = document.createElement("button");
+      pill.type = "button";
+      pill.className = "wt-k" + (it.status === "doing" ? " on" : "");
+      pill.textContent = WATCH_ST[it.status] || "想看";
+      pill.style.cursor = "pointer";
+      pill.addEventListener("click", function(){
+        var next = it.status === "want" ? "doing" : (it.status === "doing" ? "done" : "want");
+        act(function(){ it.status = next; it.ts = Date.now(); });
+        toast("改成「" + WATCH_ST[next] + "」");
+      });
+
+      var plus = document.createElement("button");
+      plus.type = "button";
+      plus.className = "wt-pm";
+      plus.textContent = "+";
+      plus.addEventListener("click", function(){
+        act(function(){ it.ep = (it.ep || 0) + 1; it.ts = Date.now(); });
+      });
+
+      var del = document.createElement("button");
+      del.type = "button";
+      del.className = "wt-x";
+      del.textContent = "✕";
+      del.addEventListener("click", function(){
+        act(function(){
+          data.watch.items = data.watch.items.filter(function(y){ return y.id !== it.id; });
+          if(data.watch.now && data.watch.now.id === it.id) data.watch.now = null;
+        });
+      });
+
+      row.appendChild(main);
+      row.appendChild(pill);
+      row.appendChild(plus);
+      row.appendChild(del);
+      list.appendChild(row);
+    });
+  }
+}
+
+/* ---------- 石头剪刀布 ---------- */
+var RPS_ICON = { r : "✊", s : "✌", p : "✋" };
+var RPS_NAME = { r : "石头", s : "剪刀", p : "布" };
+var RPS_BEAT = { r : "s", s : "p", p : "r" };
+function rpsObj(){
+  var g = gamesObj();
+  if(!g.rps) g.rps = { round : { A : "", B : "", n : 1 }, score : { A : 0, B : 0 }, hist : [] };
+  if(!g.rps.hist) g.rps.hist = [];
+  return g.rps;
+}
+function rpsSettle(){
+  var r = rpsObj(), rd = r.round;
+  if(!rd.A || !rd.B) return false;
+  var n = rd.n || 1, dup = false;
+  for(var i = 0; i < r.hist.length; i++){ if(r.hist[i].n === n){ dup = true; break; } }
+  if(dup){ r.round = { A : "", B : "", n : n + 1 }; return false; }
+  var win = rd.A === rd.B ? 0 : (RPS_BEAT[rd.A] === rd.B ? "A" : "B");
+  r.hist.unshift({ n : n, A : rd.A, B : rd.B, win : win, ts : Date.now() });
+  if(r.hist.length > 30) r.hist = r.hist.slice(0, 30);
+  if(win) r.score[win] = (r.score[win] || 0) + 1;
+  r.round = { A : "", B : "", n : n + 1 };
+  saveLocal();
+  scheduleSync();
+  return true;
+}
+function renderRps(){
+  var row = $("#rpsRow");
+  if(!row) return;
+  rpsSettle();
+  var r = rpsObj();
+  var mine = r.round[myRole()] || "", other = r.round[myRole() === "A" ? "B" : "A"] || "";
+  row.innerHTML = "";
+  ["r", "s", "p"].forEach(function(k){
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "rps-btn" + (mine === k ? " on" : "");
+    b.textContent = RPS_ICON[k];
+    b.disabled = !!mine;
+    b.style.opacity = mine ? ".55" : "1";
+    b.addEventListener("click", function(){
+      if(mine) return;
+      act(function(){ rpsObj().round[myRole()] = k; rpsObj().round.ts = Date.now(); });
+      rpsSettle();
+      renderRps();
+    });
+    row.appendChild(b);
+  });
+
+  var out = $("#rpsOut");
+  if(!out) return;
+  var lines = [];
+  if(mine && !other) lines.push("你出了 " + RPS_NAME[mine] + "，等 TA 出拳…");
+  if(!mine && other) lines.push("TA 已经出了，等你选一个。");
+  if(!mine && !other) lines.push("各自出一拳，等两边都出了自动判胜负。");
+  var last = r.hist[0];
+  if(last && (!r.round.A || !r.round.B)){
+    var res = last.win === 0 ? "这一局平了" : (last.win === "A" ? nameOf("A") + " 赢" : nameOf("B") + " 赢");
+    lines.push("上一局：你出" + RPS_NAME[last[myRole()]] + "，TA 出" + RPS_NAME[last[myRole() === "A" ? "B" : "A"]] + " —— " + res);
+  }
+  lines.push("总比分 " + nameOf("A") + " " + (r.score.A || 0) + " : " + (r.score.B || 0) + " " + nameOf("B"));
+  out.innerHTML = "";
+  lines.forEach(function(t){
+    var p = document.createElement("div");
+    p.textContent = t;
+    out.appendChild(p);
+  });
+}
+
+/* ---------- 今日一问 ---------- */
+var QA_POOL = [
+  "今天有哪一刻，你突然特别想 TA？",
+  "如果现在能送 TA 一样东西，你会送什么？",
+  "最近让你偷偷开心的一件小事是什么？",
+  "你希望明年这个时候，你们在做什么？",
+  "TA 做过哪件事，让你觉得被很认真地爱着？",
+  "你最近在为什么事烦心？说出来会好受一点。",
+  "如果给你们的相处打个分，你打几分？为什么？",
+  "有没有一句话，你想让 TA 每天都说一遍？",
+  "你觉得自己在恋爱里最像什么动物？",
+  "下次见面，你最想先做的第一件事是什么？",
+  "你偷偷希望 TA 更主动一点的地方是哪儿？",
+  "说一件今天想谢谢 TA 的事。"
+];
+function qaObj(){
+  var g = gamesObj(), t = todayStr();
+  if(!g.qa || g.qa.day !== t){
+    var idx = Math.floor(new Date().setHours(0, 0, 0, 0) / 86400000) % QA_POOL.length;
+    g.qa = { day : t, idx : idx, ansA : "", ansB : "", ts : Date.now() };
+    saveLocal();
+  }
+  return g.qa;
+}
+function renderQA(){
+  var q = qaObj();
+  var qt = $("#qaQ");
+  if(qt) qt.textContent = QA_POOL[q.idx % QA_POOL.length];
+  var mine = myRole() === "A" ? q.ansA : q.ansB;
+  var other = myRole() === "A" ? q.ansB : q.ansA;
+  var inp = $("#qaInput");
+  if(inp && document.activeElement !== inp) inp.value = mine || "";
+  var box = $("#qaOther");
+  if(!box) return;
+  box.innerHTML = "";
+  if(other){
+    var who = document.createElement("div");
+    who.className = "wt-sub";
+    who.textContent = nameOf(myRole() === "A" ? "B" : "A") + " 写的：";
+    var tx = document.createElement("div");
+    tx.style.marginTop = "4px";
+    tx.style.fontSize = "13.5px";
+    tx.style.lineHeight = "1.7";
+    tx.textContent = other;
+    box.appendChild(who);
+    box.appendChild(tx);
+  }else{
+    var w2 = document.createElement("div");
+    w2.className = "wt-sub";
+    w2.textContent = "TA 还没写，写完你这边会自动出现。";
+    box.appendChild(w2);
+  }
+}
+
+/* ---------- 绑定 ---------- */
+$("#bondFeed").addEventListener("click", function(){ bondDo("feeds", 1, 10, "它吃得很香"); });
+$("#bondPat").addEventListener("click", function(){ bondDo("pats", 3, 4, "它被顺毛了"); });
+$("#bondPlay").addEventListener("click", function(){ bondDo("plays", 2, 6, "它玩得很疯"); });
+
+$("#wtAdd").addEventListener("click", function(){
+  var v = $("#wtTitle").value.trim();
+  if(!v){ toast("先写片名"); return; }
+  var item = { id : uid(), title : v, kind : wtKind, ep : 0, status : "want", by : myRole(), ts : Date.now() };
+  act(function(){ watchObj().items.unshift(item); });
+  $("#wtTitle").value = "";
+  renderWatch();
+  toast("加好了");
+});
+$("#wtStart").addEventListener("click", function(){
+  var w = watchObj();
+  var doing = null;
+  w.items.forEach(function(it){ if(!doing && it.status === "doing") doing = it; });
+  if(!doing){ toast("先把某部切成「在看」"); return; }
+  act(function(){ data.watch.now = { id : doing.id, title : doing.title, start : Date.now(), by : myRole() }; });
+  renderWatch();
+  toast("开始计时");
+});
+$("#wtStop").addEventListener("click", function(){
+  act(function(){ data.watch.now = null; });
+  renderWatch();
+});
+$("#qaSave").addEventListener("click", function(){
+  var v = $("#qaInput").value.trim();
+  if(!v){ toast("先写点东西"); return; }
+  act(function(){
+    var q = qaObj();
+    if(myRole() === "A") q.ansA = v; else q.ansB = v;
+    q.ts = Date.now();
+  });
+  renderQA();
+  toast("存好了");
+});
+
+/* ---------- 视图切换 ---------- *//* ---------- 视图切换 ---------- */
+var MENU_VIEWS = ['note', 'games', 'watch', 'cycle', 'like', 'char', 'me'];
 
 function openSheet(){ $('#sheet').classList.add('show'); $('#sheetMask').classList.add('show'); }
 function closeSheet(){ $('#sheet').classList.remove('show'); $('#sheetMask').classList.remove('show'); }
@@ -2346,6 +2822,7 @@ function showView(name){
   if(name === 'cycle'){ renderCycle(); }
   if(name === 'like'){ renderLikes(); }
   if(name === 'char'){ renderChar(); loadCharAvatar().then(renderChar).catch(function(e){ toast(e.message); }); }
+  if(name === 'watch'){ renderWatch(); }
   window.scrollTo(0, 0);
 }
 
