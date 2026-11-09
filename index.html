@@ -180,6 +180,34 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
   max-height:110px;overflow:auto;
 }
 
+/* 照片墙 */
+.ph-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:6px 0 14px;}
+.ph-head .sec-title{margin:0;}
+.ph-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.ph-cell{
+  position:relative;aspect-ratio:1/1;border-radius:14px;overflow:hidden;
+  border:1px solid var(--line);background:rgba(255,255,255,.05);cursor:pointer;
+}
+.ph-cell img{width:100%;height:100%;object-fit:cover;display:block;}
+.ph-cell .cap{
+  position:absolute;left:0;right:0;bottom:0;padding:26px 10px 9px;
+  background:linear-gradient(180deg,transparent,rgba(0,0,0,.74));
+  font-size:11.5px;line-height:1.5;color:#fff;
+}
+.ph-empty{
+  grid-column:1/-1;text-align:center;padding:44px 16px;border:1px dashed rgba(255,255,255,.16);
+  border-radius:16px;color:var(--muted);font-size:13px;line-height:2.1;
+}
+.ph-load{grid-column:1/-1;text-align:center;color:var(--muted);font-size:13px;padding:34px 0;}
+#lightbox{
+  position:fixed;inset:0;z-index:80;background:rgba(4,6,16,.95);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+  padding:calc(24px + env(safe-area-inset-top)) 20px calc(24px + env(safe-area-inset-bottom));
+}
+#lightbox img{max-width:100%;max-height:70vh;border-radius:14px;object-fit:contain;}
+#lightbox .lc{font-size:13px;color:rgba(244,238,255,.75);text-align:center;line-height:1.8;max-width:82vw;}
+#lightbox .row{display:flex;gap:12px;}
+
 /* 提示 */
 #toast{
   position:fixed;left:50%;top:16%;transform:translate(-50%,-8px);
@@ -314,6 +342,17 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
     <div class="stack" id="noteList" style="margin-top:20px"></div>
   </div>
 
+  <!-- 相簿 -->
+  <div id="view-photo" class="view wrap hidden">
+    <div class="ph-head">
+      <p class="sec-title">我们的照片 <span id="phCount" style="color:rgba(244,238,255,.45)"></span></p>
+      <button class="btn small" id="phAdd" type="button">＋ 添加</button>
+    </div>
+    <input id="phFile" type="file" accept="image/*" multiple style="display:none">
+    <div class="ph-grid" id="phGrid"></div>
+    <p class="tip">照片会自动压缩，存进你们俩的私有空间，别人看不到。点一张可以看大图，大图里能删除。</p>
+  </div>
+
   <!-- 设置 -->
   <div id="view-me" class="view wrap hidden">
     <p class="sec-title">我们的资料</p>
@@ -331,7 +370,7 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
       <div class="set-row"><span>状态</span><b id="syncState">已连接</b></div>
       <div class="set-row"><span>最近同步</span><b id="syncTime">-</b></div>
       <div class="set-row"><span>空间编号</span><b id="gistId" style="font-size:11px">-</b></div>
-      <div class="set-row"><span>版本</span><b>v1.0</b></div>
+      <div class="set-row"><span>版本</span><b>v1.1</b></div>
       <div style="display:flex;gap:10px;margin-top:14px">
         <button class="btn small ghost" id="btnSync" style="flex:1">立即同步</button>
         <button class="btn small ghost" id="btnInvite" style="flex:1">复制邀请码</button>
@@ -354,6 +393,7 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
     <button data-view="diary"><span class="ic">✎</span><span class="lb">日记</span></button>
     <button data-view="wish"><span class="ic">✦</span><span class="lb">心愿</span></button>
     <button data-view="note"><span class="ic">✉</span><span class="lb">悄悄话</span></button>
+    <button data-view="photo"><span class="ic">▦</span><span class="lb">相簿</span></button>
     <button data-view="me"><span class="ic">♡</span><span class="lb">我们</span></button>
   </nav>
 </div>
@@ -400,11 +440,13 @@ function defaultData(){
       start : '2026-04-02',
       nextMeet : '',
       distanceKm : 520,
+      pid : '',
       ts : 0
     },
     diary : [],
     wishes : [],
     notes : [],
+    photos : [],
     moods : {}
   };
 }
@@ -415,6 +457,7 @@ function loadLocal(){
   if(!data.diary) data.diary = [];
   if(!data.wishes) data.wishes = [];
   if(!data.notes) data.notes = [];
+  if(!data.photos) data.photos = [];
   if(!data.moods) data.moods = {};
 }
 function saveLocal(){
@@ -473,13 +516,16 @@ function mergeRemote(remote){
         start : rm.start || lm.start,
         nextMeet : rm.nextMeet || '',
         distanceKm : rm.distanceKm || lm.distanceKm,
+        pid : rm.pid || lm.pid || '',
         ts : rm.ts || 0
       };
+      if(!cfg.pid && data.meta.pid){ cfg.pid = data.meta.pid; }
     }
   }
   data.diary = mergeList(data.diary, remote.diary);
   data.wishes = mergeList(data.wishes, remote.wishes);
   data.notes = mergeList(data.notes, remote.notes);
+  data.photos = mergeList(data.photos, remote.photos);
   if(remote.moods){
     ['A', 'B'].forEach(function(k){
       var l = data.moods[k], r = remote.moods[k];
@@ -595,6 +641,7 @@ function render(){
   renderWishes();
   renderNotes();
   renderSettings();
+  if($('#view-photo') && !$('#view-photo').classList.contains('hidden')) renderPhotos();
 }
 
 function renderMoods(){
@@ -710,6 +757,209 @@ function renderSettings(){
   setSyncUI(syncing ? 'wait' : 'ok');
 }
 
+/* ---------- 照片墙 ---------- */
+var photoCache = {};     /* id -> dataURL */
+var photoLoading = false;
+
+function savePhotoFile(fname, dataUrl){
+  var patch = {};
+  patch[fname] = { content : dataUrl };
+  if(!cfg.pid){
+    return gh('/gists', 'POST', {
+      description : '我们的小空间 · 照片（私密）',
+      public : false,
+      files : patch
+    }).then(function(g){
+      cfg.pid = g.id;
+      data.meta.pid = g.id;
+      data.meta.ts = Date.now();
+      saveLocal();
+    });
+  }
+  return gh('/gists/' + cfg.pid, 'PATCH', { files : patch });
+}
+
+function compressImage(file){
+  return new Promise(function(resolve, reject){
+    var fr = new FileReader();
+    fr.onload = function(){
+      var img = new Image();
+      img.onload = function(){
+        var MAX = 900;
+        var scale = Math.min(1, MAX / Math.max(img.width, img.height));
+        var cw = Math.round(img.width * scale), ch = Math.round(img.height * scale);
+        var cv = document.createElement('canvas');
+        cv.width = cw; cv.height = ch;
+        var ctx = cv.getContext('2d');
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, cw, ch);
+        ctx.drawImage(img, 0, 0, cw, ch);
+        var q = 0.62;
+        var url = cv.toDataURL('image/jpeg', q);
+        while(url.length > 250000 && q > 0.3){
+          q -= 0.1;
+          url = cv.toDataURL('image/jpeg', q);
+        }
+        resolve(url);
+      };
+      img.onerror = function(){ reject(new Error('这张图片打不开')); };
+      img.src = fr.result;
+    };
+    fr.onerror = function(){ reject(new Error('读取图片失败')); };
+    fr.readAsDataURL(file);
+  });
+}
+
+function uploadPhotos(files){
+  if(!cfg || !cfg.gistId){ toast('还没连上你们的空间'); return; }
+  var list = Array.prototype.slice.call(files || []);
+  if(!list.length) return;
+  if((data.photos.length + list.length) > 80){ toast('照片太多了，先在相簿里删几张'); return; }
+
+  var btn = $('#phAdd');
+  btn.disabled = true;
+  btn.textContent = '上传中 0/' + list.length;
+
+  var idx = 0, done = 0;
+  function step(){
+    if(idx >= list.length){
+      btn.disabled = false;
+      btn.textContent = '＋ 添加';
+      renderPhotos();
+      toast('加进相簿了，' + done + ' 张');
+      saveLocal();
+      commit().catch(function(e){ toast(e.message); });
+      return;
+    }
+    var f = list[idx++];
+    btn.textContent = '上传中 ' + (idx) + '/' + list.length;
+    compressImage(f).then(function(url){
+      var id = uid();
+      photoCache[id] = url;
+      return savePhotoFile('p_' + id + '.txt', url).then(function(){
+        data.photos.unshift({ id : id, cap : '', by : myRole(), ts : Date.now() });
+        done++;
+        renderPhotos();
+      });
+    }).then(step).catch(function(e){
+      toast(e.message || '上传失败');
+      step();
+    });
+  }
+  step();
+}
+
+function loadPhotos(force){
+  if(!cfg || !cfg.pid){ renderPhotos(); return Promise.resolve(false); }
+  var need = data.photos.some(function(p){ return !photoCache[p.id]; });
+  if(!need && !force) return Promise.resolve(true);
+  photoLoading = true;
+  renderPhotos();
+  return gh('/gists/' + cfg.pid).then(function(g){
+    var fs = g.files || {};
+    for(var name in fs){
+      if(!fs.hasOwnProperty(name)) continue;
+      if(name.indexOf('p_') !== 0) continue;
+      var id = name.slice(2, name.length - 4);
+      var c = fs[name] && fs[name].content;
+      if(c && c.indexOf('data:image') === 0) photoCache[id] = c;
+    }
+    photoLoading = false;
+    renderPhotos();
+    return true;
+  }).catch(function(e){
+    photoLoading = false;
+    renderPhotos();
+    throw e;
+  });
+}
+
+function renderPhotos(){
+  var grid = $('#phGrid');
+  if(!grid) return;
+  var cnt = $('#phCount');
+  if(cnt) cnt.textContent = data.photos.length ? '· ' + data.photos.length : '';
+  grid.innerHTML = '';
+
+  if(!data.photos.length){
+    grid.innerHTML = '<div class="ph-empty">还没有照片<br>加一张，让她打开就能看到<br><span style="opacity:.6">点右上角「＋ 添加」</span></div>';
+    return;
+  }
+  if(photoLoading){
+    grid.innerHTML = '<div class="ph-load">照片加载中…</div>';
+    return;
+  }
+  if(data.photos.some(function(p){ return !photoCache[p.id]; })){
+    grid.innerHTML = '<div class="ph-empty">照片还没同步过来<br><span style="opacity:.6">检查一下网络，或者点「我们 → 立即同步」</span></div>';
+    return;
+  }
+
+  data.photos.forEach(function(p){
+    var src = photoCache[p.id];
+    var cell = document.createElement('div');
+    cell.className = 'ph-cell';
+
+    var im = document.createElement('img');
+    im.src = src;
+    im.alt = '';
+    im.loading = 'lazy';
+    cell.appendChild(im);
+
+    if(p.cap){
+      var cap = document.createElement('div');
+      cap.className = 'cap';
+      cap.textContent = p.cap;
+      cell.appendChild(cap);
+    }
+    cell.addEventListener('click', function(){ openLightbox(src, p); });
+    grid.appendChild(cell);
+  });
+}
+
+function openLightbox(src, p){
+  var old = document.getElementById('lightbox');
+  if(old) old.parentNode.removeChild(old);
+
+  var box = document.createElement('div');
+  box.id = 'lightbox';
+
+  var im = document.createElement('img');
+  im.src = src;
+  box.appendChild(im);
+
+  var cap = document.createElement('div');
+  cap.className = 'lc';
+  cap.textContent = '由 ' + nameOf(p.by) + ' 添加 · ' + fmtTime(p.ts);
+  box.appendChild(cap);
+
+  var row = document.createElement('div');
+  row.className = 'row';
+
+  var del = document.createElement('button');
+  del.className = 'btn small ghost';
+  del.textContent = '删除这张';
+  del.addEventListener('click', function(e){ e.stopPropagation(); delPhoto(p); box.parentNode.removeChild(box); });
+  row.appendChild(del);
+
+  var cls = document.createElement('button');
+  cls.className = 'btn small ghost';
+  cls.textContent = '关闭';
+  cls.addEventListener('click', function(){ box.parentNode.removeChild(box); });
+  row.appendChild(cls);
+
+  box.appendChild(row);
+  box.addEventListener('click', function(e){ if(e.target === box) box.parentNode.removeChild(box); });
+  document.body.appendChild(box);
+}
+
+function delPhoto(p){
+  if(!confirm('从你们的相簿里删掉这张吗？')) return;
+  data.photos = data.photos.filter(function(x){ return x.id !== p.id; });
+  saveLocal();
+  renderPhotos();
+  commit().catch(function(e){ toast(e.message); });
+}
+
 function esc(s){
   return (s == null ? '' : String(s))
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -732,6 +982,10 @@ function showView(name){
   $all('.tabbar button').forEach(function(b){
     b.classList.toggle('on', b.getAttribute('data-view') === name);
   });
+  if(name === 'photo'){
+    renderPhotos();
+    loadPhotos().catch(function(e){ toast(e.message); });
+  }
   window.scrollTo(0, 0);
 }
 
@@ -948,6 +1202,12 @@ $('#btnReset').addEventListener('click', function(){
   localStorage.removeItem(LS_CFG);
   localStorage.removeItem(LS_DATA);
   location.reload();
+});
+
+$('#phAdd').addEventListener('click', function(){ $('#phFile').click(); });
+$('#phFile').addEventListener('change', function(e){
+  uploadPhotos(e.target.files);
+  e.target.value = '';
 });
 
 $all('.tabbar button').forEach(function(b){
