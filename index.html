@@ -74,6 +74,34 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
 .rps-btn{flex:1;padding:14px 0;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.05);color:#fff;font-size:24px;cursor:pointer;line-height:1;}
 .rps-btn.on{border-color:rgba(255,159,196,.8);background:rgba(255,159,196,.16);}
 .rps-out{font-size:12.5px;color:var(--muted);line-height:1.9;}
+/* ---------- 周期日历 ---------- */
+.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.cal-nav{width:36px;height:32px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--text);font-family:inherit;font-size:16px;line-height:1;cursor:pointer;}
+.cal-nav:active{transform:scale(.94);}
+.cal-title{font-size:15px;font-weight:600;letter-spacing:.5px;}
+.cal-week{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:11px;color:var(--muted);margin-bottom:6px;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+.cal-cell{position:relative;height:46px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:13px;color:rgba(244,238,255,.5);background:rgba(255,255,255,.012);cursor:pointer;transition:transform .12s;}
+.cal-cell:active{transform:scale(.94);}
+.cal-cell.blank{background:none;cursor:default;}
+.cal-cell.p{background:linear-gradient(180deg,#ff6b96,#dd3f74);color:#fff;font-weight:600;}
+.cal-cell.pp{background:rgba(255,95,140,.18);border:1px dashed rgba(255,130,168,.7);color:#ffc2d2;}
+.cal-cell.o{background:linear-gradient(180deg,#b98cff,#8458e6);color:#fff;font-weight:600;}
+.cal-cell.oo{background:rgba(150,120,255,.16);border:1px dashed rgba(170,140,255,.5);color:#d3c2ff;}
+.cal-cell.f{background:rgba(150,120,255,.10);color:#c9b6ff;}
+.cal-cell.today{box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.55);}
+.cal-cell.sel{box-shadow:inset 0 0 0 2px #ffd166;}
+.cal-ops{margin-top:12px;border-top:1px solid var(--line);padding-top:10px;}
+.cal-ops-date{font-size:12px;color:var(--muted);margin-bottom:8px;}
+.cal-ops-btns{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.cal-ops-btns button{border-radius:10px;font-family:inherit;font-size:12px;padding:9px 2px;cursor:pointer;border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--text);}
+.cal-ops-btns button#calMarkP{border-color:rgba(255,95,140,.5);background:rgba(255,95,140,.12);}
+.cal-ops-btns button#calMarkO{border-color:rgba(150,120,255,.5);background:rgba(150,120,255,.12);}
+.cal-ops-btns button#calMarkX{color:var(--muted);}
+.set-unit{display:flex;align-items:center;gap:6px;}
+.set-input{width:70px;height:30px;border-radius:9px;border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--text);font-family:inherit;font-size:12px;text-align:center;}
+.cyc-legend{flex-wrap:wrap;gap:10px;}
+.lg-pp{background:rgba(255,95,140,.16);border:1px dashed rgba(255,120,160,.6);}
 /* ---------- 小火人房间 ---------- */
 .pet-stage{position:relative;height:42vh;min-height:260px;border-radius:18px;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;padding:6px 0 10px;
   background:radial-gradient(110% 85% at 50% 28%, rgba(255,168,84,.20), rgba(16,12,26,.86) 68%);border:1px solid var(--line);}
@@ -634,7 +662,7 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
       <div class="set-row"><span>最近同步</span><b id="syncTime">-</b></div>
       <div class="set-row"><span>我的身份</span><b id="roleTxt">-</b></div>
       <div class="set-row"><span>空间编号</span><b id="gistId" style="font-size:11px">-</b></div>
-      <div class="set-row"><span>版本</span><b>v2.3</b></div>
+      <div class="set-row"><span>版本</span><b>v2.4</b></div>
       <div style="display:flex;gap:10px;margin-top:14px">
         <button class="btn small ghost" id="btnSync" style="flex:1">立即同步</button>
         <button class="btn small ghost" id="btnInvite" style="flex:1">复制邀请码</button>
@@ -668,12 +696,39 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
         </div>
       </div>
       <div class="cyc-now" id="cycNow"></div>
-      <div class="cyc-strip" id="cycStrip"></div>
+    </div>
+
+    <p class="sec-title">周期日历</p>
+    <div class="card">
+      <div class="cal-head">
+        <button class="cal-nav" id="calPrev" type="button">‹</button>
+        <div class="cal-title" id="calTitle">--</div>
+        <button class="cal-nav" id="calNext" type="button">›</button>
+      </div>
+      <div class="cal-week"><span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span></div>
+      <div class="cal-grid" id="calGrid"></div>
       <div class="cyc-legend">
         <span><i class="lg-p"></i>经期</span>
-        <span><i class="lg-f"></i>易孕期</span>
+        <span><i class="lg-pp"></i>预计经期</span>
         <span><i class="lg-o"></i>排卵日</span>
+        <span><i class="lg-f"></i>易孕期</span>
       </div>
+      <div class="cal-ops hidden" id="calOps">
+        <div class="cal-ops-date" id="calOpsDate">--</div>
+        <div class="cal-ops-btns">
+          <button type="button" id="calMarkP">经期开始</button>
+          <button type="button" id="calMarkO">排卵日</button>
+          <button type="button" id="calMarkX">清除</button>
+        </div>
+      </div>
+      <p class="tip">点任意一天就能标记。经期只会记开始那天，往后按「经期长度」连着算。</p>
+    </div>
+
+    <p class="sec-title">自定义</p>
+    <div class="card">
+      <div class="set-row"><span>周期长度</span><div class="set-unit"><input class="set-input" id="cycLen" type="number" min="18" max="60" placeholder="自动"><b>天</b></div></div>
+      <div class="set-row"><span>经期长度</span><div class="set-unit"><input class="set-input" id="cycDur" type="number" min="1" max="10" placeholder="5"><b>天</b></div></div>
+      <p class="tip">留空就按你记过的日子自己算平均。填了就是你说了算。</p>
     </div>
 
     <p class="sec-title">记一笔</p>
@@ -839,7 +894,7 @@ var API = 'https://api.github.com';
 var FILE_NAME = 'couple.json';
 var LS_CFG = 'lp_cfg_v1';
 var LS_DATA = 'lp_data_v1';
-var BUILD_ID = 'b20261110-0230';
+var BUILD_ID = 'b20261110-0310';
 
 var cfg = null;
 var data = null;
@@ -883,7 +938,7 @@ function defaultData(){
     meals : [],
     mealsCleanTs : 0,
     likes : [],
-    cycle : { records : [], dur : 5 },
+    cycle : { records : [], dur : 5, ovu : [], len : 0 },
     char : { name : '小绒', face : '🐱', look : 'c1', style : '温柔', lines : [], hasAvatar : false, ts : 0 },
     games : { quiz : null, cards : [], wheel : null },
     moods : {}
@@ -904,7 +959,7 @@ function loadLocal(){
   else if(/^c[1-8]$/.test(data.char.look)) data.char.look = 'f1';
   else if(data.char.look === 'c9') data.char.look = 'f2';
   if(!data.char.lines) data.char.lines = [];
-  if(!data.cycle || !data.cycle.records) data.cycle = { records : [], dur : 5 };
+  if(!data.cycle || !data.cycle.records) data.cycle = { records : [], dur : 5, ovu : [], len : 0 };
   if(!data.games) data.games = {};
   if(!data.games.cards) data.games.cards = [];
   if(!data.moods) data.moods = {};
@@ -1034,6 +1089,8 @@ function mergeRemote(remote){
   if(remote.cycle && remote.cycle.records){
     data.cycle = data.cycle || { records : [], dur : 5 };
     data.cycle.records = mergeList(data.cycle.records, remote.cycle.records);
+    data.cycle.ovu = mergeList(data.cycle.ovu || [], remote.cycle.ovu || []);
+    if(remote.cycle.len) data.cycle.len = remote.cycle.len;
     if(remote.cycle.dur) data.cycle.dur = remote.cycle.dur;
   }
   if(remote.games){
@@ -2010,117 +2067,186 @@ function fmtMD(d){
   return (d.getMonth() + 1) + '月' + d.getDate() + '日';
 }
 
-function renderCycle(){
-  if(!$('#cycStrip')) return;
-  var s = cycleStats();
+var calCur = null, calSel = "";
 
-  $('#cycAvg').textContent = s.avg + ' 天';
-  $('#cycCount').textContent = s.records.length ? '· 共 ' + s.records.length + ' 次' : '';
-  if($('#cycDate') && !$('#cycDate').value) $('#cycDate').value = todayStr();
+function cycleObj(){
+  data.cycle = data.cycle || { records : [], dur : 5, ovu : [], len : 0 };
+  if(!data.cycle.records) data.cycle.records = [];
+  if(!data.cycle.ovu) data.cycle.ovu = [];
+  if(!data.cycle.dur) data.cycle.dur = 5;
+  if(!data.cycle.len) data.cycle.len = 0;
+  return data.cycle;
+}
+function calKey(d){ return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
+function dayAfter(d, n){ return new Date(d.getTime() + n * 86400000); }
 
-  var strip = $('#cycStrip');
-  strip.innerHTML = '';
+function calMarks(){
+  var c = cycleObj(), st = cycleStats();
+  var avg = c.len || st.avg || 28, dur = c.dur || 5;
+  var marks = {};
+  function set(k, f){ if(!marks[k]) marks[k] = {}; marks[k][f] = 1; }
 
-  if(!s.has){
-    $('#cycDay').textContent = '--';
-    $('#cycNext').textContent = '-';
-    $('#cycLeft').textContent = '-';
-    $('#cycOvu').textContent = '-';
-    $('#cycNow').textContent = '还没有记录。在下面记一次开始的日子，就能算出下次大概什么时候来。';
-  }else{
-    $('#cycDay').textContent = s.dayNo;
-    $('#cycNext').textContent = fmtMD(s.next);
-    if(s.left > 0) $('#cycLeft').textContent = '还有 ' + s.left + ' 天';
-    else if(s.left === 0) $('#cycLeft').textContent = '就是今天';
-    else $('#cycLeft').textContent = '已推迟 ' + (-s.left) + ' 天';
-    $('#cycOvu').textContent = fmtMD(s.ovu);
-
-    var base = parseDate(todayStr());
-
-    /* 候选的开始日：预计日前后各排几个周期 */
-    var cands = [];
-    for(var k = -1; k <= 4; k++){
-      cands.push(new Date(s.next.getTime() + k * s.avg * 86400000));
-    }
-
-    var nowTxt;
-    if(s.left > 0){
-      nowTxt = '按记录推算，下次大概在 ' + fmtMD(s.next) + '，还有 ' + s.left + ' 天。';
-    }else if(s.left === 0){
-      nowTxt = '按记录推算，今天差不多就是预计的日子。';
-    }else{
-      nowTxt = '按记录推算，预计的 ' + fmtMD(s.next) + ' 已经过去 ' + (-s.left) + ' 天。如果真来了，记得补记一笔，下次会更准。';
-    }
-
-    /* 今天是否落在易孕期 */
-    var fertileNow = false;
-    cands.forEach(function(c){
-      var ov = new Date(c.getTime() - 14 * 86400000);
-      var diff = Math.round((base - ov) / 86400000);
-      if(diff >= -5 && diff <= 1) fertileNow = true;
-    });
-    if(fertileNow){
-      nowTxt += ' 这几天在易孕期（排卵前后），情绪和身体感觉都可能波动大一些。';
-    }
-    $('#cycNow').textContent = nowTxt;
-
-    for(var i = 0; i < 35; i++){
-      var dd = new Date(base.getTime() + i * 86400000);
-      var inP = false, cls = '';
-      cands.forEach(function(c){
-        var a = Math.round((dd - c) / 86400000);
-        if(a >= 0 && a < s.dur) inP = true;
-      });
-      if(!inP){
-        cands.forEach(function(c){
-          var ov = new Date(c.getTime() - 14 * 86400000);
-          var a = Math.round((dd - ov) / 86400000);
-          if(a === 0) cls = 'o';
-          else if(a >= -5 && a <= 1 && cls !== 'o') cls = 'f';
-        });
-      }
-      if(inP) cls = 'p';
-      var cell = document.createElement('i');
-      cell.className = cls + (i === 0 ? ' t' : '');
-      strip.appendChild(cell);
-    }
+  var recs = (c.records || []).slice().sort(function(a, b){ return a.start < b.start ? -1 : 1; });
+  var starts = [];
+  recs.forEach(function(r){ starts.push({ d : parseDate(r.start), real : true }); });
+  if(starts.length){
+    var last = starts[starts.length - 1].d;
+    for(var k = 1; k <= 12; k++) starts.push({ d : dayAfter(last, avg * k), real : false });
+    var first = starts[0].d;
+    for(var k2 = 1; k2 <= 8; k2++) starts.push({ d : dayAfter(first, -avg * k2), real : false });
   }
 
-  var list = $('#cycList');
-  list.innerHTML = '';
-  if(!s.records.length){
-    var empty = document.createElement('div');
-    empty.className = 'lk-empty';
-    empty.textContent = '还没有记录。第一次记下来，只能先按 28 天估算，记到第二次才会准一些。';
+  /* 经期：实测实心，预测虚线 */
+  starts.forEach(function(it){
+    for(var i = 0; i < dur; i++){
+      var k = calKey(dayAfter(it.d, i));
+      if(it.real) set(k, "p");
+      else if(!marks[k] || !marks[k].p) set(k, "pp");
+    }
+  });
+
+  /* 排卵日：每个周期固定 下次经期前 14 天；有自定义就用自定义 */
+  var oList = [];
+  starts.forEach(function(it){
+    var pick = null;
+    (c.ovu || []).forEach(function(o){
+      var diff = Math.round((parseDate(o.date) - it.d) / 86400000);
+      if(diff >= 0 && diff < avg && !pick) pick = parseDate(o.date);
+    });
+    oList.push(pick || dayAfter(it.d, avg - 14));
+  });
+  (c.ovu || []).forEach(function(o){ oList.push(parseDate(o.date)); });
+
+  oList.forEach(function(ov){
+    var k = calKey(ov);
+    if(!marks[k] || !marks[k].p) set(k, "o");
+    for(var i = -5; i <= 1; i++){
+      var kk = calKey(dayAfter(ov, i));
+      if(!marks[kk] || (!marks[kk].p && !marks[kk].o)) set(kk, "f");
+    }
+  });
+  return marks;
+}
+
+function renderCalendar(){
+  var grid = $("#calGrid");
+  if(!grid) return;
+  if(!calCur){ var t = new Date(); calCur = { y : t.getFullYear(), m : t.getMonth() }; }
+  $("#calTitle").textContent = calCur.y + "年" + (calCur.m + 1) + "月";
+  var marks = calMarks();
+  var first = new Date(calCur.y, calCur.m, 1);
+  var lead = first.getDay();
+  var days = new Date(calCur.y, calCur.m + 1, 0).getDate();
+  var tk = todayStr();
+  grid.innerHTML = "";
+  for(var i = 0; i < lead; i++){
+    var bl = document.createElement("div");
+    bl.className = "cal-cell blank";
+    grid.appendChild(bl);
+  }
+  for(var d = 1; d <= days; d++){
+    var dd = new Date(calCur.y, calCur.m, d);
+    var k = calKey(dd);
+    var el = document.createElement("div");
+    el.className = "cal-cell";
+    el.textContent = d;
+    el.setAttribute("data-date", k);
+    var mk = marks[k] || {};
+    if(mk.p) el.classList.add("p");
+    else if(mk.o) el.classList.add("o");
+    else if(mk.f) el.classList.add("f");
+    else if(mk.pp) el.classList.add("pp");
+    if(k === tk) el.classList.add("today");
+    if(k === calSel) el.classList.add("sel");
+    grid.appendChild(el);
+  }
+}
+
+function calPick(key){
+  calSel = key;
+  var d = parseDate(key);
+  var wk = ["日", "一", "二", "三", "四", "五", "六"][d.getDay()];
+  $("#calOpsDate").textContent = (d.getMonth() + 1) + "月" + d.getDate() + "日 · 周" + wk;
+  $("#calOps").classList.remove("hidden");
+  renderCalendar();
+}
+
+function renderCycle(){
+  if(!$("#cycDay")) return;
+  var st = cycleStats();
+  var c = cycleObj();
+  $("#cycAvg").textContent = st.avg + " 天";
+  $("#cycCount").textContent = st.records.length ? "· 共 " + st.records.length + " 次" : "";
+  if($("#cycDate") && !$("#cycDate").value) $("#cycDate").value = todayStr();
+  if($("#cycLen") && document.activeElement !== $("#cycLen")) $("#cycLen").value = c.len ? c.len : "";
+  if($("#cycDur") && document.activeElement !== $("#cycDur")) $("#cycDur").value = c.dur || 5;
+
+  if(!st.has){
+    $("#cycDay").textContent = "--";
+    $("#cycNext").textContent = "-";
+    $("#cycLeft").textContent = "-";
+    $("#cycOvu").textContent = "-";
+    $("#cycNow").textContent = "还没有记录。在日历上点一下开始的那天，就能算出下次大概什么时候来。";
+  }else{
+    $("#cycDay").textContent = st.dayNo;
+    $("#cycNext").textContent = fmtMD(st.next);
+    if(st.left > 0) $("#cycLeft").textContent = "还有 " + st.left + " 天";
+    else if(st.left === 0) $("#cycLeft").textContent = "就是今天";
+    else $("#cycLeft").textContent = "已推迟 " + (-st.left) + " 天";
+    var ovuTxt = fmtMD(st.ovu);
+    var mine = (c.ovu || []).filter(function(o){ return o.date >= todayStr(); }).sort(function(a, b){ return a.date < b.date ? -1 : 1; })[0];
+    if(mine) ovuTxt = fmtMD(parseDate(mine.date)) + "（自定义）";
+    $("#cycOvu").textContent = ovuTxt;
+
+    var txt;
+    if(st.left > 0) txt = "按记录推算，下次大概在 " + fmtMD(st.next) + "，还有 " + st.left + " 天。";
+    else if(st.left === 0) txt = "按记录推算，今天差不多就是预计的日子。";
+    else txt = "预计的 " + fmtMD(st.next) + " 已经过去 " + (-st.left) + " 天，真来了记得在日历上补一笔。";
+    var base = parseDate(todayStr());
+    var near = false;
+    for(var k = -1; k <= 2; k++){
+      var ov = dayAfter(st.next, k * st.avg - 14);
+      var diff = Math.round((base - ov) / 86400000);
+      if(diff >= -5 && diff <= 1) near = true;
+    }
+    if(near) txt += " 这几天在易孕期（排卵前后），身体和情绪都可能波动大一些。";
+    $("#cycNow").textContent = txt;
+  }
+
+  renderCalendar();
+
+  var list = $("#cycList");
+  list.innerHTML = "";
+  if(!st.records.length){
+    var empty = document.createElement("div");
+    empty.className = "lk-empty";
+    empty.textContent = "还没有记录。第一次记下来，只能先按 28 天估算，记到第二次才会准一些。";
     list.appendChild(empty);
   }else{
-    s.records.slice().reverse().forEach(function(r){
-      var row = document.createElement('div');
-      row.className = 'cyc-rec';
-
-      var left = document.createElement('div');
-      var b = document.createElement('b');
+    st.records.slice().reverse().forEach(function(r){
+      var row = document.createElement("div");
+      row.className = "cyc-rec";
+      var left = document.createElement("div");
+      var b = document.createElement("b");
       b.textContent = r.start;
       left.appendChild(b);
-
-      var idx = s.records.indexOf(r);
+      var idx = st.records.indexOf(r);
       if(idx > 0){
-        var gap = Math.round((parseDate(r.start) - parseDate(s.records[idx - 1].start)) / 86400000);
+        var gap = Math.round((parseDate(r.start) - parseDate(st.records[idx - 1].start)) / 86400000);
         if(gap > 0 && gap < 90){
-          var g = document.createElement('span');
-          g.className = 'gap';
-          g.textContent = '间隔 ' + gap + ' 天';
+          var g = document.createElement("span");
+          g.className = "gap";
+          g.textContent = "间隔 " + gap + " 天";
           left.appendChild(g);
         }
       }
       row.appendChild(left);
-
-      var rm = document.createElement('button');
-      rm.type = 'button';
-      rm.className = 'rm';
-      rm.textContent = '✕';
-      rm.addEventListener('click', function(){
-        if(!confirm('删掉 ' + r.start + ' 这条记录？')) return;
+      var rm = document.createElement("button");
+      rm.type = "button";
+      rm.className = "rm";
+      rm.textContent = "✕";
+      rm.addEventListener("click", function(){
+        if(!confirm("删掉 " + r.start + " 这条记录？")) return;
         act(function(){
           data.cycle.records = data.cycle.records.filter(function(x){ return x.id !== r.id; });
         });
@@ -2131,9 +2257,41 @@ function renderCycle(){
     });
   }
 }
+function addOvuDate(dateStr){
+  if(!dateStr){ toast("先选个日期"); return; }
+  var c = cycleObj();
+  var dup = (c.ovu || []).some(function(o){ return o.date === dateStr; });
+  if(dup){ toast("这天已经是排卵日了"); return; }
+  var item = { id : uid(), date : dateStr, role : myRole(), ts : Date.now() };
+  act(function(){
+    c.ovu = c.ovu || [];
+    c.ovu.push(item);
+  });
+  renderCycle();
+  toast("标成排卵日了");
+}
 
+function clearDay(dateStr){
+  var c = cycleObj();
+  var had = (c.records || []).filter(function(r){ return r.start === dateStr; }).length +
+            (c.ovu || []).filter(function(o){ return o.date === dateStr; }).length;
+  if(!had){ toast("这天没有标记"); return; }
+  act(function(){
+    c.records = (c.records || []).filter(function(r){ return r.start !== dateStr; });
+    c.ovu = (c.ovu || []).filter(function(o){ return o.date !== dateStr; });
+  });
+  renderCycle();
+  toast("清掉了");
+}
 function addCycleDate(dateStr){
   if(!dateStr){ toast('先选个日期'); return; }
+  data.cycle = cycleObj();
+  var dur0 = data.cycle.dur || 5;
+  var inSeg = (data.cycle.records || []).some(function(r){
+    var diff = Math.round((parseDate(dateStr) - parseDate(r.start)) / 86400000);
+    return diff >= 0 && diff < dur0;
+  });
+  if(inSeg){ toast("这天已经在经期里了"); return; }
   data.cycle = data.cycle || { records : [], dur : 5 };
   var dup = data.cycle.records.some(function(r){ return r.start === dateStr; });
   if(dup){ toast('这天已经记过了'); return; }
@@ -3437,6 +3595,49 @@ $all('#sheet .sheet-grid button').forEach(function(b){
 
 $('#cycAdd').addEventListener('click', function(){ addCycleDate($('#cycDate').value); });
 $('#cycToday').addEventListener('click', function(){ addCycleDate(todayStr()); });
+$("#calPrev").addEventListener("click", function(){
+  if(!calCur){ var t = new Date(); calCur = { y : t.getFullYear(), m : t.getMonth() }; }
+  calCur.m--;
+  if(calCur.m < 0){ calCur.m = 11; calCur.y--; }
+  renderCalendar();
+});
+$("#calNext").addEventListener("click", function(){
+  if(!calCur){ var t = new Date(); calCur = { y : t.getFullYear(), m : t.getMonth() }; }
+  calCur.m++;
+  if(calCur.m > 11){ calCur.m = 0; calCur.y++; }
+  renderCalendar();
+});
+$("#calGrid").addEventListener("click", function(e){
+  var cell = e.target.closest(".cal-cell");
+  if(!cell || cell.classList.contains("blank")) return;
+  calPick(cell.getAttribute("data-date"));
+});
+$("#calMarkP").addEventListener("click", function(){
+  if(!calSel){ toast("先点一天"); return; }
+  addCycleDate(calSel);
+});
+$("#calMarkO").addEventListener("click", function(){
+  if(!calSel){ toast("先点一天"); return; }
+  addOvuDate(calSel);
+});
+$("#calMarkX").addEventListener("click", function(){
+  if(!calSel){ toast("先点一天"); return; }
+  clearDay(calSel);
+});
+$("#cycLen").addEventListener("change", function(){
+  var v = parseInt(this.value, 10);
+  var c = cycleObj();
+  var use = (v >= 18 && v <= 60) ? v : 0;
+  act(function(){ c.len = use; });
+  renderCycle();
+});
+$("#cycDur").addEventListener("change", function(){
+  var v = parseInt(this.value, 10);
+  var c = cycleObj();
+  var use = (v >= 1 && v <= 10) ? v : 5;
+  act(function(){ c.dur = use; });
+  renderCycle();
+});
 
 $('#likeOpen').addEventListener('click', function(){
   $('#likeForm').classList.toggle('hidden');
