@@ -482,6 +482,8 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
   border:1px solid var(--line);background:rgba(255,255,255,.05);color:rgba(244,238,255,.72);transition:.15s;}
 .sym-chip.on{background:linear-gradient(135deg,rgba(255,214,166,.28),rgba(255,111,145,.34));
   border-color:rgba(255,111,145,.6);color:#fff;font-weight:600;}
+.sym-note{margin:-4px 0 14px;font-size:13px;padding:11px 13px;border-radius:12px;line-height:1.75;min-height:58px;resize:none;}
+.sym-note:focus{background:rgba(255,255,255,.14);}
 .sym-divider{height:1px;background:var(--line);margin:4px 0 14px;}
 .sym-list{display:flex;flex-direction:column;gap:9px;}
 .sym-row{padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid var(--line);font-size:12.5px;line-height:1.8;}
@@ -489,6 +491,7 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
 .sym-row .d b{font-size:13px;}
 .sym-row .t{color:var(--muted);}
 .sym-empty{font-size:12.5px;color:var(--muted);line-height:1.8;}
+.sym-quote{margin-top:6px;font-size:12px;color:#ffc9da;line-height:1.7;}
 .cal-dot{position:absolute;right:4px;top:3px;width:7px;height:7px;border-radius:50%;background:#ffd6a6;box-shadow:0 0 0 1.5px rgba(8,11,28,.9),0 0 6px rgba(255,214,166,.5);}
 .cal-dot.m{background:#ff9ec4;}
 .cal-dot.bm{background:linear-gradient(135deg,#ffd6a6,#ff9ec4);}
@@ -722,7 +725,7 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
       <div class="set-row"><span>最近同步</span><b id="syncTime">-</b></div>
       <div class="set-row"><span>我的身份</span><b id="roleTxt">-</b></div>
       <div class="set-row"><span>空间编号</span><b id="gistId" style="font-size:11px">-</b></div>
-      <div class="set-row"><span>版本</span><b>v3.0</b></div>
+      <div class="set-row"><span>版本</span><b>v3.1</b></div>
       <div style="display:flex;gap:10px;margin-top:14px">
         <button class="btn small ghost" id="btnSync" style="flex:1">立即同步</button>
         <button class="btn small ghost" id="btnInvite" style="flex:1">复制邀请码</button>
@@ -810,6 +813,7 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
       <div class="sym-chips" id="symBody"></div>
       <p class="sym-label">心情</p>
       <div class="sym-chips" id="symMood"></div>
+      <textarea class="sym-note" id="symNote" rows="2" autocomplete="off" spellcheck="false" placeholder="写一句今天的感觉，想写多少写多少…"></textarea>
       <p class="tip">点一下记上，再点一下取消。默认记到今天；在日历上点了某一天，这里就跟着换成那天。</p>
       <div class="sym-divider"></div>
       <p class="sym-label">记过的日子</p>
@@ -970,7 +974,7 @@ var API = 'https://api.github.com';
 var FILE_NAME = 'couple.json';
 var LS_CFG = 'lp_cfg_v1';
 var LS_DATA = 'lp_data_v1';
-var BUILD_ID = 'b20261110-0800';
+var BUILD_ID = 'b20261110-0900';
 
 var cfg = null;
 var data = null;
@@ -2468,6 +2472,8 @@ function renderSym(){
   $("#symStage").textContent = symStage(k);
   symChips(body, SYM_BODY, it.p || [], "p");
   symChips($("#symMood"), SYM_MOOD, it.m || [], "m");
+  var nt = $("#symNote");
+  if(nt && document.activeElement !== nt) nt.value = it.note || "";
   renderSymList();
 }
 function renderSymList(){
@@ -2509,7 +2515,42 @@ function renderSymList(){
     if(v.m && v.m.length) parts.push("心情 " + v.m.join("·"));
     t.textContent = parts.join("　");
     row.appendChild(t);
+    if(v.note){
+      var q = document.createElement("div");
+      q.className = "sym-quote";
+      q.textContent = "“" + v.note + "”";
+      row.appendChild(q);
+    }
     box.appendChild(row);
+  });
+}
+
+var symNoteTimer = null;
+function saveSymNote(k, v){
+  var cur = symOf(k);
+  if(((cur && cur.note) || "") === v) return;
+  act(function(){
+    var c = cycleObj();
+    c.sym = c.sym || {};
+    var it = c.sym[k] || { p : [], m : [], ts : 0, role : myRole() };
+    if(!it.p) it.p = [];
+    if(!it.m) it.m = [];
+    it.note = v;
+    it.ts = Date.now();
+    it.role = myRole();
+    c.sym[k] = it;
+  });
+  renderSymList();
+}
+if($("#symNote")){
+  $("#symNote").addEventListener("input", function(){
+    var k = symKey(), v = this.value;
+    clearTimeout(symNoteTimer);
+    symNoteTimer = setTimeout(function(){ saveSymNote(k, v); }, 700);
+  });
+  $("#symNote").addEventListener("blur", function(){
+    clearTimeout(symNoteTimer);
+    saveSymNote(symKey(), this.value);
   });
 }
 
