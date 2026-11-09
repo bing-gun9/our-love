@@ -125,10 +125,12 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
 .pet-act span{font-size:11.5px;color:var(--muted);}
 .pet-foods{display:flex;gap:8px;margin-top:10px;}
 .pet-foods button{flex:1;background:rgba(255,159,196,.10);border:1px solid rgba(255,159,196,.4);border-radius:11px;color:var(--text);font-family:inherit;font-size:12px;padding:10px 2px;cursor:pointer;}
-.pet-chat{display:flex;flex-direction:column;gap:10px;}
+.pet-chat{display:flex;flex-direction:column;gap:10px;max-height:330px;overflow-y:auto;padding-right:2px;}
 .pet-msg{max-width:84%;font-size:12.5px;line-height:1.65;padding:8px 11px;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid var(--line);}
 .pet-msg.pet{background:rgba(255,150,60,.14);border-color:rgba(255,150,60,.35);align-self:flex-start;border-bottom-left-radius:4px;}
-.pet-msg.me{align-self:flex-end;border-bottom-right-radius:4px;}
+.pet-msg.me{align-self:flex-end;border-bottom-right-radius:4px;background:rgba(255,159,196,.12);border-color:rgba(255,159,196,.38);}
+.pet-msg.ta{align-self:flex-start;border-bottom-left-radius:4px;background:rgba(150,120,255,.14);border-color:rgba(150,120,255,.4);}
+.pet-chat-hint{font-size:11px;color:var(--muted);margin-bottom:2px;}
 .pet-msg .who{display:block;font-size:10px;color:var(--muted);margin-bottom:3px;}
 .pet-pop{position:absolute;left:50%;top:24%;transform:translateX(-50%);font-size:13px;font-weight:600;color:#ffd9a0;z-index:3;animation:petPop 1.15s ease-out forwards;pointer-events:none;white-space:nowrap;}
 @keyframes petPop{0%{opacity:0;transform:translate(-50%,6px) scale(.9);}22%{opacity:1;transform:translate(-50%,-6px) scale(1);}100%{opacity:0;transform:translate(-50%,-46px) scale(1);}}
@@ -662,7 +664,7 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
       <div class="set-row"><span>最近同步</span><b id="syncTime">-</b></div>
       <div class="set-row"><span>我的身份</span><b id="roleTxt">-</b></div>
       <div class="set-row"><span>空间编号</span><b id="gistId" style="font-size:11px">-</b></div>
-      <div class="set-row"><span>版本</span><b>v2.4</b></div>
+      <div class="set-row"><span>版本</span><b>v2.5</b></div>
       <div style="display:flex;gap:10px;margin-top:14px">
         <button class="btn small ghost" id="btnSync" style="flex:1">立即同步</button>
         <button class="btn small ghost" id="btnInvite" style="flex:1">复制邀请码</button>
@@ -857,8 +859,8 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
       <p class="tip" id="petTip">它饿了自己会叫。你们两个喂都算数，谁喂得多它就更黏谁。</p>
     </div>
 
-    <p class="sec-title">它说过的话</p>
-    <div class="card"><div class="pet-chat" id="petChat"></div></div>
+    <p class="sec-title">聊天记录</p>
+    <div class="card"><p class="pet-chat-hint" id="petChatHint">你们俩跟它说的都在这，谁先谁后按时间排。TA 说的话是紫色气泡。</p><div class="pet-chat" id="petChat"></div></div>
     <div style="height:20px"></div>
   </div>
   <div id="sheetMask" class="sheet-mask"></div>
@@ -894,7 +896,7 @@ var API = 'https://api.github.com';
 var FILE_NAME = 'couple.json';
 var LS_CFG = 'lp_cfg_v1';
 var LS_DATA = 'lp_data_v1';
-var BUILD_ID = 'b20261110-0310';
+var BUILD_ID = 'b20261110-0400';
 
 var cfg = null;
 var data = null;
@@ -3074,10 +3076,13 @@ function renderPet(){
     }
     p.chats.slice(0, 8).reverse().forEach(function(m){
       var el = document.createElement("div");
-      el.className = "pet-msg " + (m.role === "pet" ? "pet" : "me");
+      var who2 = m.role === "pet" ? "pet" : (m.role === myRole() ? "me" : "ta");
+      el.className = "pet-msg " + who2;
       var who = document.createElement("span");
       who.className = "who";
-      who.textContent = m.role === "pet" ? (charObj().name || "小火人") : nameOf(m.role);
+      if(m.role === "pet") who.textContent = charObj().name || "小火人";
+      else if(m.role === myRole()) who.textContent = nameOf(m.role) + "（你）";
+      else who.textContent = nameOf(m.role) + "（TA）";
       var tx = document.createElement("span");
       tx.textContent = m.text;
       el.appendChild(who);
