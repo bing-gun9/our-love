@@ -701,7 +701,7 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
       <div class="set-row"><span>最近同步</span><b id="syncTime">-</b></div>
       <div class="set-row"><span>我的身份</span><b id="roleTxt">-</b></div>
       <div class="set-row"><span>空间编号</span><b id="gistId" style="font-size:11px">-</b></div>
-      <div class="set-row"><span>版本</span><b>v2.7</b></div>
+      <div class="set-row"><span>版本</span><b>v2.9</b></div>
       <div style="display:flex;gap:10px;margin-top:14px">
         <button class="btn small ghost" id="btnSync" style="flex:1">立即同步</button>
         <button class="btn small ghost" id="btnInvite" style="flex:1">复制邀请码</button>
@@ -774,7 +774,7 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
     <div class="card">
       <div class="cyc-add">
         <input type="date" id="cycDate">
-        <button class="btn small" id="cycAdd" type="button">记录</button>
+        <button class="btn small" id="cycAdd" type="button">记下这天</button>
       </div>
       <button class="btn small ghost" id="cycToday" style="width:100%;margin-top:10px">今天来了</button>
     </div>
@@ -933,7 +933,7 @@ var API = 'https://api.github.com';
 var FILE_NAME = 'couple.json';
 var LS_CFG = 'lp_cfg_v1';
 var LS_DATA = 'lp_data_v1';
-var BUILD_ID = 'b20261110-0500';
+var BUILD_ID = 'b20261110-0700';
 
 var cfg = null;
 var data = null;
@@ -977,7 +977,7 @@ function defaultData(){
     meals : [],
     mealsCleanTs : 0,
     likes : [],
-    cycle : { records : [], dur : 5, ovu : [], len : 0 },
+    cycle : { records : [], dur : 5, ovu : [], len : 0, rid : {}, ovid : {} },
     char : { name : '小绒', face : '🐱', look : 'c1', style : '温柔', lines : [], hasAvatar : false, ts : 0 },
     games : { quiz : null, cards : [], wheel : null },
     moods : {}
@@ -998,7 +998,9 @@ function loadLocal(){
   else if(/^c[1-8]$/.test(data.char.look)) data.char.look = 'f1';
   else if(data.char.look === 'c9') data.char.look = 'f2';
   if(!data.char.lines) data.char.lines = [];
-  if(!data.cycle || !data.cycle.records) data.cycle = { records : [], dur : 5, ovu : [], len : 0 };
+  if(!data.cycle || !data.cycle.records) data.cycle = { records : [], dur : 5, ovu : [], len : 0, rid : {}, ovid : {} };
+  if(!data.cycle.rid) data.cycle.rid = {};
+  if(!data.cycle.ovid) data.cycle.ovid = {};
   if(!data.games) data.games = {};
   if(!data.games.cards) data.games.cards = [];
   if(!data.moods) data.moods = {};
@@ -1129,6 +1131,14 @@ function mergeRemote(remote){
     data.cycle = data.cycle || { records : [], dur : 5 };
     data.cycle.records = mergeList(data.cycle.records, remote.cycle.records);
     data.cycle.ovu = mergeList(data.cycle.ovu || [], remote.cycle.ovu || []);
+    var lrid = data.cycle.rid || {}, rrid = remote.cycle.rid || {};
+    for(var rk in rrid){ if(rrid.hasOwnProperty(rk) && (!lrid[rk] || rrid[rk] > lrid[rk])) lrid[rk] = rrid[rk]; }
+    data.cycle.rid = lrid;
+    var lovd = data.cycle.ovid || {}, rovd = remote.cycle.ovid || {};
+    for(var ok in rovd){ if(rovd.hasOwnProperty(ok) && (!lovd[ok] || rovd[ok] > lovd[ok])) lovd[ok] = rovd[ok]; }
+    data.cycle.ovid = lovd;
+    data.cycle.records = data.cycle.records.filter(function(x){ return !(x && data.cycle.rid[x.id]); });
+    data.cycle.ovu = data.cycle.ovu.filter(function(x){ return !(x && data.cycle.ovid[x.id]); });
     if(remote.cycle.len) data.cycle.len = remote.cycle.len;
     if(remote.cycle.dur) data.cycle.dur = remote.cycle.dur;
   }
@@ -2114,6 +2124,8 @@ function cycleObj(){
   if(!data.cycle.ovu) data.cycle.ovu = [];
   if(!data.cycle.dur) data.cycle.dur = 5;
   if(!data.cycle.len) data.cycle.len = 0;
+  if(!data.cycle.rid) data.cycle.rid = {};
+  if(!data.cycle.ovid) data.cycle.ovid = {};
   return data.cycle;
 }
 function calKey(d){ return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
@@ -2203,6 +2215,7 @@ function renderCalendar(){
 
 function calPick(key){
   calSel = key;
+  if($("#cycDate")) $("#cycDate").value = key;
   var d = parseDate(key);
   var wk = ["日", "一", "二", "三", "四", "五", "六"][d.getDay()];
   $("#calOpsDate").textContent = (d.getMonth() + 1) + "月" + d.getDate() + "日 · 周" + wk;
@@ -2216,7 +2229,6 @@ function renderCycle(){
   var c = cycleObj();
   $("#cycAvg").textContent = st.avg + " 天";
   $("#cycCount").textContent = st.records.length ? "· 共 " + st.records.length + " 次" : "";
-  if($("#cycDate") && !$("#cycDate").value) $("#cycDate").value = todayStr();
   if($("#cycLen") && document.activeElement !== $("#cycLen")) $("#cycLen").value = c.len ? c.len : "";
   if($("#cycDur") && document.activeElement !== $("#cycDur")) $("#cycDur").value = c.dur || 5;
 
@@ -2287,7 +2299,9 @@ function renderCycle(){
       rm.addEventListener("click", function(){
         if(!confirm("删掉 " + r.start + " 这条记录？")) return;
         act(function(){
-          data.cycle.records = data.cycle.records.filter(function(x){ return x.id !== r.id; });
+          data.cycle.rid = data.cycle.rid || {};
+  data.cycle.rid[r.id] = Date.now();
+  data.cycle.records = data.cycle.records.filter(function(x){ return x.id !== r.id; });
         });
         renderCycle();
       });
@@ -2316,6 +2330,10 @@ function clearDay(dateStr){
             (c.ovu || []).filter(function(o){ return o.date === dateStr; }).length;
   if(!had){ toast("这天没有标记"); return; }
   act(function(){
+    var now = Date.now();
+    c.rid = c.rid || {}; c.ovid = c.ovid || {};
+    (c.records || []).forEach(function(r){ if(r.start === dateStr && r.id) c.rid[r.id] = now; });
+    (c.ovu || []).forEach(function(o){ if(o.date === dateStr && o.id) c.ovid[o.id] = now; });
     c.records = (c.records || []).filter(function(r){ return r.start !== dateStr; });
     c.ovu = (c.ovu || []).filter(function(o){ return o.date !== dateStr; });
   });
@@ -2323,7 +2341,7 @@ function clearDay(dateStr){
   toast("清掉了");
 }
 function addCycleDate(dateStr){
-  if(!dateStr){ toast('先选个日期'); return; }
+  if(!dateStr){ toast('先点日历上的一天，或点「今天来了」'); return; }
   data.cycle = cycleObj();
   var dur0 = data.cycle.dur || 5;
   var inSeg = (data.cycle.records || []).some(function(r){
@@ -2336,6 +2354,7 @@ function addCycleDate(dateStr){
   if(dup){ toast('这天已经记过了'); return; }
   var item = { id : uid(), start : dateStr, role : myRole(), ts : Date.now() };
   act(function(){ data.cycle.records.push(item); });
+  if($("#cycDate")) $("#cycDate").value = "";
   renderCycle();
   toast('记下了 ' + dateStr);
 }
