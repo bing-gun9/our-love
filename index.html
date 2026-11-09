@@ -220,7 +220,7 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
 
 /* 角色 */
 .char-card{display:flex;gap:14px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;margin-top:14px;}
-.char-face{width:58px;height:58px;flex:0 0 58px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:30px;background:linear-gradient(135deg,rgba(255,159,196,.26),rgba(168,140,255,.26));border:1px solid rgba(255,255,255,.14);overflow:hidden;}
+.char-face{width:64px;height:64px;flex:0 0 64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:30px;background:linear-gradient(135deg,rgba(255,159,196,.26),rgba(168,140,255,.26));border:1px solid rgba(255,255,255,.14);overflow:hidden;}
 .char-face img{width:100%;height:100%;object-fit:cover;}
 .char-face.big{width:88px;height:88px;flex:0 0 88px;font-size:44px;}
 .char-talk{flex:1;min-width:0;cursor:pointer;}
@@ -228,7 +228,8 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
 .bubble{font-size:13px;line-height:1.65;color:var(--text);background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.09);border-radius:12px;padding:9px 12px;margin:0;}
 .char-preview{display:flex;gap:14px;align-items:center;margin-bottom:16px;}
 .face-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
-.face-opt{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:rgba(255,255,255,.05);font-size:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit;color:#fff;padding:0;}
+.face-opt{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:rgba(255,255,255,.05);font-size:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit;color:#fff;padding:0;overflow:hidden;}
+.face-opt svg,#homeFace svg,#charFace svg{width:100%;height:100%;display:block;}
 .face-opt.on{border-color:rgba(255,159,196,.8);background:rgba(255,159,196,.16);}
 .style-opt{padding:8px 13px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--muted);font-size:12.5px;cursor:pointer;font-family:inherit;}
 .style-opt.on{border-color:rgba(255,159,196,.75);color:#fff;background:rgba(255,159,196,.16);}
@@ -578,7 +579,7 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
       <div class="set-row"><span>最近同步</span><b id="syncTime">-</b></div>
       <div class="set-row"><span>我的身份</span><b id="roleTxt">-</b></div>
       <div class="set-row"><span>空间编号</span><b id="gistId" style="font-size:11px">-</b></div>
-      <div class="set-row"><span>版本</span><b>v1.8</b></div>
+      <div class="set-row"><span>版本</span><b>v1.9</b></div>
       <div style="display:flex;gap:10px;margin-top:14px">
         <button class="btn small ghost" id="btnSync" style="flex:1">立即同步</button>
         <button class="btn small ghost" id="btnInvite" style="flex:1">复制邀请码</button>
@@ -730,7 +731,7 @@ var API = 'https://api.github.com';
 var FILE_NAME = 'couple.json';
 var LS_CFG = 'lp_cfg_v1';
 var LS_DATA = 'lp_data_v1';
-var BUILD_ID = 'b20261109-2330';
+var BUILD_ID = 'b20261109-2350';
 
 var cfg = null;
 var data = null;
@@ -775,7 +776,7 @@ function defaultData(){
     mealsCleanTs : 0,
     likes : [],
     cycle : { records : [], dur : 5 },
-    char : { name : '小绒', face : '🐱', style : '温柔', lines : [], hasAvatar : false, ts : 0 },
+    char : { name : '小绒', face : '🐱', look : 'c1', style : '温柔', lines : [], hasAvatar : false, ts : 0 },
     games : { quiz : null, cards : [], wheel : null },
     moods : {}
   };
@@ -790,7 +791,8 @@ function loadLocal(){
   if(!data.photos) data.photos = [];
   if(!data.meals) data.meals = [];
   if(!data.likes) data.likes = [];
-  if(!data.char) data.char = { name : '小绒', face : '🐱', style : '温柔', lines : [], hasAvatar : false, ts : 0 };
+  if(!data.char) data.char = { name : '小绒', face : '🐱', look : 'c1', style : '温柔', lines : [], hasAvatar : false, ts : 0 };
+  if(!data.char.look) data.char.look = 'c1';
   if(!data.char.lines) data.char.lines = [];
   if(!data.cycle || !data.cycle.records) data.cycle = { records : [], dur : 5 };
   if(!data.games) data.games = {};
@@ -873,6 +875,7 @@ function mergeRemote(remote){
     data.char = {
       name : newer ? (rc.name || lc.name) : (lc.name || rc.name),
       face : newer ? (rc.face || lc.face) : (lc.face || rc.face),
+      look : newer ? (rc.look || lc.look || 'c1') : (lc.look || rc.look || 'c1'),
       style : newer ? (rc.style || lc.style) : (lc.style || rc.style),
       hasAvatar : !!rc.hasAvatar,
       lines : mergeList(lc.lines || [], rc.lines || []),
@@ -2028,12 +2031,96 @@ var CHAR_LIB = {
 };
 var charAv = '';
 
+/* Q 版小人造型 */
+var CHAR_LOOKS = [
+  { id : 'c1', hair : '#3a2b3f', cloth : '#ff9eb5', cut : 'bob'  },
+  { id : 'c2', hair : '#6b4226', cloth : '#a8d8f0', cut : 'twin' },
+  { id : 'c3', hair : '#2b2b33', cloth : '#ffd76e', cut : 'bun'  },
+  { id : 'c4', hair : '#8a5a3b', cloth : '#b8a6f0', cut : 'long' },
+  { id : 'c5', hair : '#4a3b6b', cloth : '#9ee6c8', cut : 'cap'  },
+  { id : 'c6', hair : '#7a3b3b', cloth : '#ffb3a7', cut : 'bow'  },
+  { id : 'c7', hair : '#3a2b3f', cloth : '#ffd7e6', cut : 'cat'  },
+  { id : 'c8', hair : '#5b4636', cloth : '#9ad4b0', cut : 'boy'  }
+];
+
+function chibiSvg(lookId){
+  var L = null;
+  for(var i = 0; i < CHAR_LOOKS.length; i++){ if(CHAR_LOOKS[i].id === lookId) L = CHAR_LOOKS[i]; }
+  if(!L) L = CHAR_LOOKS[0];
+  var hair = L.hair, cloth = L.cloth, skin = '#ffe3d3', blush = '#ff9fa8';
+  var s = '';
+
+  /* 后发 / 双马尾 / 长发 */
+  if(L.cut === 'long'){
+    s += '<path d="M17 46 q-3 50 33 50 q36 0 33 -50 z" fill="' + hair + '"/>';
+  }
+  if(L.cut === 'twin'){
+    s += '<circle cx="14" cy="55" r="10" fill="' + hair + '"/>';
+    s += '<circle cx="86" cy="55" r="10" fill="' + hair + '"/>';
+    s += '<circle cx="14" cy="55" r="10" fill="' + hair + '"/>';
+    s += '<circle cx="86" cy="55" r="10" fill="' + hair + '"/>';
+  }
+
+  /* 身体 */
+  s += '<path d="M31 100 q0 -25 19 -25 q19 0 19 25 z" fill="' + cloth + '"/>';
+  s += '<ellipse cx="50" cy="79" rx="10" ry="4" fill="rgba(0,0,0,.10)"/>';
+  s += '<rect x="44" y="70" width="12" height="5" rx="2.5" fill="#ffe3d3"/>';
+
+  /* 头 */
+  s += '<circle cx="50" cy="42" r="25" fill="' + skin + '"/>';
+  /* 耳 */
+  s += '<circle cx="25" cy="45" r="4.5" fill="' + skin + '"/><circle cx="75" cy="45" r="4.5" fill="' + skin + '"/>';
+  /* 头顶头发 */
+  if(L.cut === 'boy'){
+    s += '<path d="M28 40 q-1 -20 22 -20 q23 0 22 20 q-8 -9 -22 -9 q-14 0 -22 9 z" fill="' + hair + '"/>';
+    s += '<path d="M51 17 q9 -7 7 -13 q-7 2 -9 12 z" fill="' + hair + '"/>';
+  }else{
+    s += '<path d="M22 43 q1 -25 28 -25 q27 0 28 25 q-10 -13 -28 -13 q-18 0 -28 13 z" fill="' + hair + '"/>';
+    s += '<path d="M44 20 q6 6 3 11 q-4 2 -6 -3 z" fill="' + hair + '"/>';
+  }
+
+  /* 眼睛 */
+  s += '<circle cx="39" cy="47" r="4.2" fill="#3a2430"/>';
+  s += '<circle cx="61" cy="47" r="4.2" fill="#3a2430"/>';
+  s += '<circle cx="40.4" cy="45.6" r="1.5" fill="#fff"/>';
+  s += '<circle cx="62.4" cy="45.6" r="1.5" fill="#fff"/>';
+  /* 腮红 */
+  s += '<ellipse cx="30" cy="55" rx="5" ry="2.8" fill="' + blush + '" opacity=".55"/>';
+  s += '<ellipse cx="70" cy="55" rx="5" ry="2.8" fill="' + blush + '" opacity=".55"/>';
+  /* 嘴 */
+  s += '<path d="M47 55 q3 3.2 6 0" stroke="#cf7280" stroke-width="1.5" fill="none" stroke-linecap="round"/>';
+
+  /* 顶上装饰 */
+  if(L.cut === 'cat'){
+    s += '<path d="M28 20 L24 6 L38 12 z" fill="' + hair + '"/>';
+    s += '<path d="M72 20 L76 6 L62 12 z" fill="' + hair + '"/>';
+    s += '<path d="M29.5 17 L27 9 L35 12.5 z" fill="#ff9fb0"/>';
+    s += '<path d="M70.5 17 L73 9 L65 12.5 z" fill="#ff9fb0"/>';
+  }
+  if(L.cut === 'bun'){ s += '<circle cx="50" cy="13" r="9" fill="' + hair + '"/>'; }
+  if(L.cut === 'cap'){
+    s += '<path d="M22 34 q28 -26 56 0 l-3 5 q-25 -15 -50 0 z" fill="#8ad0ff"/>';
+    s += '<path d="M22 34 q28 -26 56 0 q-28 8 -56 0 z" fill="#7cc3f2"/>';
+  }
+  if(L.cut === 'bow'){
+    s += '<path d="M72 17 l9 -5 v10 z" fill="#ff6f91"/><path d="M72 17 l-9 -5 v10 z" fill="#ff6f91"/>';
+    s += '<circle cx="72" cy="17" r="2.4" fill="#ffe0e8"/>';
+  }
+  if(L.cut === 'twin'){
+    s += '<circle cx="14" cy="55" r="3" fill="#ffe0e8" opacity=".55"/>';
+    s += '<circle cx="86" cy="55" r="3" fill="#ffe0e8" opacity=".55"/>';
+  }
+
+  return '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">' + s + '</svg>';
+}
+
 function defaultChar(){
-  return { name : '小绒', face : '🐱', style : '温柔', lines : [], hasAvatar : false, ts : 0 };
+  return { name : '小绒', face : '🐱', look : 'c1', style : '温柔', lines : [], hasAvatar : false, ts : 0 };
 }
 function charObj(){
   if(!data.char) data.char = defaultChar();
   if(!data.char.lines) data.char.lines = [];
+  if(!data.char.look) data.char.look = 'c1';
   return data.char;
 }
 function otherRole(){ return myRole() === 'A' ? 'B' : 'A'; }
@@ -2096,7 +2183,7 @@ function renderChar(){
     var el = $('#' + id);
     if(!el) return;
     if(av) el.innerHTML = '<img src="' + av + '" alt="">';
-    else el.textContent = c.face || '🐱';
+    else el.innerHTML = chibiSvg(c.look);
   });
 
   if($('#homeCharName')) $('#homeCharName').textContent = c.name || '小绒';
@@ -2112,19 +2199,20 @@ function renderChar(){
       chip.innerHTML = '<img src="' + av + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
       faceRow.appendChild(chip);
     }
-    CHAR_FACES.forEach(function(f){
+    CHAR_LOOKS.forEach(function(L){
       var b = document.createElement('button');
       b.type = 'button';
-      b.className = 'face-opt' + (!av && c.face === f ? ' on' : '');
-      b.textContent = f;
+      b.className = 'face-opt' + (!av && (c.look || 'c1') === L.id ? ' on' : '');
+      b.innerHTML = chibiSvg(L.id);
       b.addEventListener('click', function(){
         act(function(){
-          charObj().face = f;
+          charObj().look = L.id;
           charObj().hasAvatar = false;
           charObj().ts = Date.now();
         });
         charAv = '';
         renderChar();
+        toast('换成这套造型');
       });
       faceRow.appendChild(b);
     });
