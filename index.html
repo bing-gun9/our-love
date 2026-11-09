@@ -234,6 +234,50 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
 }
 .wheel-hint{margin-top:6px;text-align:center;font-size:12px;color:var(--muted);}
 
+.seg{display:flex;gap:8px;margin:2px 0 16px;}
+.seg button{
+  flex:1;padding:9px 0;border-radius:11px;border:1px solid var(--line);
+  background:transparent;color:var(--muted);font-size:13px;font-family:inherit;cursor:pointer;
+}
+.seg button.on{background:rgba(255,111,145,.16);border-color:rgba(255,111,145,.5);color:#fff;}
+
+.slot-row{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;}
+.slot{
+  position:relative;border-radius:14px;border:1px solid var(--line);background:var(--card);
+  overflow:hidden;min-height:136px;display:flex;flex-direction:column;
+}
+.slot .lbl{font-size:11px;color:var(--muted);letter-spacing:.1em;padding:8px 10px 6px;}
+.slot-more{
+  position:absolute;right:7px;bottom:7px;width:27px;height:27px;border-radius:50%;
+  border:1px solid rgba(255,255,255,.28);background:rgba(8,11,28,.72);color:#fff;
+  font-size:14px;line-height:1;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;z-index:2;font-family:inherit;
+}
+.slot .shots{display:flex;flex:1;gap:1px;min-height:0;}
+.slot .shot{position:relative;flex:1;overflow:hidden;min-width:0;}
+.slot .shot img{width:100%;height:100%;object-fit:cover;display:block;}
+.slot .shot .who{
+  position:absolute;left:0;right:0;bottom:0;font-size:9.5px;padding:11px 4px 4px;
+  background:linear-gradient(180deg,transparent,rgba(0,0,0,.75));color:#fff;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.slot .add{
+  flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:5px;
+  color:var(--muted);font-size:12px;border:1px dashed rgba(255,255,255,.18);
+  border-radius:11px;margin:0 8px 8px;cursor:pointer;
+}
+.slot .add .plus{font-size:18px;color:var(--pink-soft);}
+
+.meal-day{margin-top:18px;}
+.meal-day .dh{font-size:12px;color:var(--muted);margin-bottom:8px;letter-spacing:.06em;}
+.meal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.meal-grid .mi{position:relative;aspect-ratio:1/1;border-radius:10px;overflow:hidden;border:1px solid var(--line);background:rgba(255,255,255,.05);}
+.meal-grid .mi img{width:100%;height:100%;object-fit:cover;display:block;}
+.meal-grid .mi .sb{
+  position:absolute;left:4px;bottom:4px;font-size:9.5px;background:rgba(0,0,0,.58);
+  color:#fff;padding:2px 5px;border-radius:6px;
+}
+
 /* 提示 */
 #toast{
   position:fixed;left:50%;top:16%;transform:translate(-50%,-8px);
@@ -370,13 +414,31 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
 
   <!-- 相簿 -->
   <div id="view-photo" class="view wrap hidden">
-    <div class="ph-head">
-      <p class="sec-title">我们的照片 <span id="phCount" style="color:rgba(244,238,255,.45)"></span></p>
-      <button class="btn small" id="phAdd" type="button">＋ 添加</button>
+    <div class="seg">
+      <button id="segPhoto" class="on" type="button">照片墙</button>
+      <button id="segMeal" type="button">一日三餐</button>
     </div>
-    <input id="phFile" type="file" accept="image/*" multiple style="display:none">
-    <div class="ph-grid" id="phGrid"></div>
-    <p class="tip">照片会自动压缩，存进你们俩的私有空间，别人看不到。点一张可以看大图，大图里能删除。</p>
+
+    <div id="panePhoto">
+      <div class="ph-head">
+        <p class="sec-title">我们的照片 <span id="phCount" style="color:rgba(244,238,255,.45)"></span></p>
+        <button class="btn small" id="phAdd" type="button">＋ 添加</button>
+      </div>
+      <input id="phFile" type="file" accept="image/*" multiple style="display:none">
+      <div class="ph-grid" id="phGrid"></div>
+      <p class="tip">照片会自动压缩，存进你们俩的私有空间，别人看不到。点一张可以看大图，大图里能删除。</p>
+    </div>
+
+    <div id="paneMeal" class="hidden">
+      <p class="sec-title" style="display:flex;align-items:center;justify-content:space-between">
+        <span>今天的饭 <span id="mealToday" style="color:rgba(244,238,255,.45)"></span></span>
+        <span id="mealBudget" style="font-size:11.5px;color:rgba(244,238,255,.45)"></span>
+      </p>
+      <div class="slot-row" id="slotRow"></div>
+      <input id="mealFile" type="file" accept="image/*" style="display:none">
+      <div id="mealHist"></div>
+      <p class="tip">每顿你拍一张、TA 拍一张，互相看看今天吃了什么。超过 30 天的会自动清掉，只留最近一个月。</p>
+    </div>
   </div>
 
   <!-- 一起玩 -->
@@ -424,7 +486,7 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
       <div class="set-row"><span>状态</span><b id="syncState">已连接</b></div>
       <div class="set-row"><span>最近同步</span><b id="syncTime">-</b></div>
       <div class="set-row"><span>空间编号</span><b id="gistId" style="font-size:11px">-</b></div>
-      <div class="set-row"><span>版本</span><b>v1.2</b></div>
+      <div class="set-row"><span>版本</span><b>v1.3</b></div>
       <div style="display:flex;gap:10px;margin-top:14px">
         <button class="btn small ghost" id="btnSync" style="flex:1">立即同步</button>
         <button class="btn small ghost" id="btnInvite" style="flex:1">复制邀请码</button>
@@ -496,12 +558,15 @@ function defaultData(){
       nextMeet : '',
       distanceKm : 520,
       pid : '',
+      mid : '',
       ts : 0
     },
     diary : [],
     wishes : [],
     notes : [],
     photos : [],
+    meals : [],
+    mealsCleanTs : 0,
     games : { quiz : null, cards : [], wheel : null },
     moods : {}
   };
@@ -514,6 +579,7 @@ function loadLocal(){
   if(!data.wishes) data.wishes = [];
   if(!data.notes) data.notes = [];
   if(!data.photos) data.photos = [];
+  if(!data.meals) data.meals = [];
   if(!data.games) data.games = {};
   if(!data.games.cards) data.games.cards = [];
   if(!data.moods) data.moods = {};
@@ -575,15 +641,18 @@ function mergeRemote(remote){
         nextMeet : rm.nextMeet || '',
         distanceKm : rm.distanceKm || lm.distanceKm,
         pid : rm.pid || lm.pid || '',
+        mid : rm.mid || lm.mid || '',
         ts : rm.ts || 0
       };
       if(!cfg.pid && data.meta.pid){ cfg.pid = data.meta.pid; }
+      if(!cfg.mid && data.meta.mid){ cfg.mid = data.meta.mid; }
     }
   }
   data.diary = mergeList(data.diary, remote.diary);
   data.wishes = mergeList(data.wishes, remote.wishes);
   data.notes = mergeList(data.notes, remote.notes);
   data.photos = mergeList(data.photos, remote.photos);
+  data.meals = mergeList(data.meals, remote.meals);
   if(remote.games){
     var lg = gamesObj(), rg = remote.games;
     if(rg.quiz){
@@ -720,7 +789,10 @@ function render(){
   renderWishes();
   renderNotes();
   renderSettings();
-  if($('#view-photo') && !$('#view-photo').classList.contains('hidden')) renderPhotos();
+  if($('#view-photo') && !$('#view-photo').classList.contains('hidden')){
+    renderPhotos();
+    if(mealMode) renderMeals();
+  }
   if($('#view-games') && !$('#view-games').classList.contains('hidden')) renderGames();
 }
 
@@ -859,13 +931,16 @@ function savePhotoFile(fname, dataUrl){
   return gh('/gists/' + cfg.pid, 'PATCH', { files : patch });
 }
 
-function compressImage(file){
+function compressImage(file, maxSide, startQ, maxBytes){
+  maxSide = maxSide || 900;
+  startQ = startQ || 0.62;
+  maxBytes = maxBytes || 250000;
   return new Promise(function(resolve, reject){
     var fr = new FileReader();
     fr.onload = function(){
       var img = new Image();
       img.onload = function(){
-        var MAX = 900;
+        var MAX = maxSide;
         var scale = Math.min(1, MAX / Math.max(img.width, img.height));
         var cw = Math.round(img.width * scale), ch = Math.round(img.height * scale);
         var cv = document.createElement('canvas');
@@ -874,9 +949,9 @@ function compressImage(file){
         ctx.fillStyle = '#ffffff';
         ctx.fillRect(0, 0, cw, ch);
         ctx.drawImage(img, 0, 0, cw, ch);
-        var q = 0.62;
+        var q = startQ;
         var url = cv.toDataURL('image/jpeg', q);
-        while(url.length > 250000 && q > 0.3){
+        while(url.length > maxBytes && q > 0.3){
           q -= 0.1;
           url = cv.toDataURL('image/jpeg', q);
         }
@@ -1009,17 +1084,19 @@ function openLightbox(src, p){
 
   var cap = document.createElement('div');
   cap.className = 'lc';
-  cap.textContent = '由 ' + nameOf(p.by) + ' 添加 · ' + fmtTime(p.ts);
+  cap.textContent = (p.cap ? p.cap + ' · ' : '') + nameOf(p.by || p.role) + ' · ' + fmtTime(p.ts);
   box.appendChild(cap);
 
   var row = document.createElement('div');
   row.className = 'row';
 
-  var del = document.createElement('button');
-  del.className = 'btn small ghost';
-  del.textContent = '删除这张';
-  del.addEventListener('click', function(e){ e.stopPropagation(); delPhoto(p); box.parentNode.removeChild(box); });
-  row.appendChild(del);
+  if(!p.slot){
+    var del = document.createElement('button');
+    del.className = 'btn small ghost';
+    del.textContent = '删除这张';
+    del.addEventListener('click', function(e){ e.stopPropagation(); delPhoto(p); box.parentNode.removeChild(box); });
+    row.appendChild(del);
+  }
 
   var cls = document.createElement('button');
   cls.className = 'btn small ghost';
@@ -1038,6 +1115,198 @@ function delPhoto(p){
   saveLocal();
   renderPhotos();
   commit().catch(function(e){ toast(e.message); });
+}
+
+/* ---------- 一日三餐 ---------- */
+var MEAL_SLOTS = ['早', '午', '晚'];
+var mealMode = false;
+
+function saveMealFile(fname, dataUrl){
+  var patch = {};
+  patch[fname] = { content : dataUrl };
+  if(!cfg.mid){
+    return gh('/gists', 'POST', {
+      description : '我们的小空间 · 三餐（私密）',
+      public : false,
+      files : patch
+    }).then(function(g){
+      cfg.mid = g.id;
+      data.meta.mid = g.id;
+      data.meta.ts = Date.now();
+      saveLocal();
+    });
+  }
+  return gh('/gists/' + cfg.mid, 'PATCH', { files : patch });
+}
+
+function sameDay(ts, now){
+  var d = new Date(ts), n = now || new Date();
+  return d.getFullYear() === n.getFullYear() && d.getMonth() === n.getMonth() && d.getDate() === n.getDate();
+}
+
+function pickMeal(slot){
+  window.__mealSlot = slot;
+  $('#mealFile').click();
+}
+
+function addMeal(slot, file){
+  if(!cfg || !cfg.gistId){ toast('还没连上空间'); return; }
+  compressImage(file, 480, 0.5, 90000).then(function(url){
+    var id = uid();
+    photoCache[id] = url;
+    return saveMealFile('p_' + id + '.txt', url).then(function(){
+      data.meals.unshift({ id : id, role : myRole(), slot : slot, ts : Date.now() });
+      saveLocal();
+      renderMeals();
+      commit().catch(function(e){ toast(e.message); });
+      toast(slot + '餐记下来了');
+    });
+  }).catch(function(e){ toast(e.message || '上传失败'); });
+}
+
+function renderMeals(){
+  var row = $('#slotRow');
+  if(!row) return;
+  row.innerHTML = '';
+
+  var today = data.meals.filter(function(m){ return sameDay(m.ts); });
+  var td = $('#mealToday');
+  if(td) td.textContent = today.length ? '· 今天记了 ' + today.length + ' 张' : '· 今天还没记录';
+  var budget = $('#mealBudget');
+  if(budget) budget.textContent = data.meals.length ? '近一个月 ' + data.meals.length + ' 张' : '';
+
+  MEAL_SLOTS.forEach(function(slot){
+    var el = document.createElement('div');
+    el.className = 'slot';
+
+    var lbl = document.createElement('div');
+    lbl.className = 'lbl';
+    lbl.textContent = slot === '早' ? '早餐' : (slot === '午' ? '午餐' : '晚餐');
+    el.appendChild(lbl);
+
+    var items = today.filter(function(m){ return m.slot === slot; }).slice(0, 2);
+
+    if(items.length){
+      var shots = document.createElement('div');
+      shots.className = 'shots';
+      items.forEach(function(m){
+        var shot = document.createElement('div');
+        shot.className = 'shot';
+        var src = photoCache[m.id];
+        if(src){
+          var im = document.createElement('img');
+          im.src = src;
+          shot.appendChild(im);
+          shot.addEventListener('click', function(){ openLightbox(src, m); });
+        }
+        var who = document.createElement('div');
+        who.className = 'who';
+        var dt = new Date(m.ts);
+        who.textContent = nameOf(m.role).slice(0, 4) + ' ' + pad(dt.getHours()) + ':' + pad(dt.getMinutes());
+        shot.appendChild(who);
+        shots.appendChild(shot);
+      });
+      el.appendChild(shots);
+
+      if(items.length < 2){
+        var more = document.createElement('button');
+        more.type = 'button';
+        more.className = 'slot-more';
+        more.textContent = '＋';
+        more.addEventListener('click', function(){ pickMeal(slot); });
+        el.appendChild(more);
+      }
+    }else{
+      var add = document.createElement('div');
+      add.className = 'add';
+      add.innerHTML = '<span class="plus">＋</span><span>记一笔</span>';
+      add.addEventListener('click', function(){ pickMeal(slot); });
+      el.appendChild(add);
+    }
+    row.appendChild(el);
+  });
+
+  var hist = $('#mealHist');
+  if(!hist) return;
+  hist.innerHTML = '';
+  var past = data.meals.filter(function(m){ return !sameDay(m.ts); });
+  if(!past.length) return;
+
+  var groups = {};
+  past.forEach(function(m){
+    var d = new Date(m.ts);
+    var key = d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+    if(!groups[key]) groups[key] = [];
+    groups[key].push(m);
+  });
+  var keys = Object.keys(groups).sort().reverse().slice(0, 10);
+  keys.forEach(function(key){
+    var wrap = document.createElement('div');
+    wrap.className = 'meal-day';
+    var dh = document.createElement('div');
+    dh.className = 'dh';
+    var parts = key.split('-');
+    dh.textContent = (+parts[1]) + ' 月 ' + (+parts[2]) + ' 日 · ' + groups[key].length + ' 张';
+    wrap.appendChild(dh);
+
+    var grid = document.createElement('div');
+    grid.className = 'meal-grid';
+    groups[key].slice(0, 9).forEach(function(m){
+      var cell = document.createElement('div');
+      cell.className = 'mi';
+      var src = photoCache[m.id];
+      if(src){
+        var im = document.createElement('img');
+        im.src = src;
+        im.loading = 'lazy';
+        cell.appendChild(im);
+        cell.addEventListener('click', function(){ openLightbox(src, m); });
+      }
+      var sb = document.createElement('div');
+      sb.className = 'sb';
+      sb.textContent = m.slot + ' · ' + nameOf(m.role).slice(0, 3);
+      cell.appendChild(sb);
+      grid.appendChild(cell);
+    });
+    wrap.appendChild(grid);
+    hist.appendChild(wrap);
+  });
+}
+
+function loadMeals(){
+  if(!cfg || !cfg.mid) return Promise.resolve(false);
+  var need = data.meals.some(function(m){ return !photoCache[m.id]; });
+  if(!need) return Promise.resolve(true);
+  return gh('/gists/' + cfg.mid).then(function(g){
+    var fs = g.files || {};
+    for(var name in fs){
+      if(!fs.hasOwnProperty(name)) continue;
+      if(name.indexOf('p_') !== 0) continue;
+      var id = name.slice(2, name.length - 4);
+      var c = fs[name] && fs[name].content;
+      if(c && c.indexOf('data:image') === 0) photoCache[id] = c;
+    }
+    return true;
+  });
+}
+
+function cleanupMeals(){
+  var limit = 30 * 86400000;
+  var now = Date.now();
+  var drop = data.meals.filter(function(m){ return (now - m.ts) > limit; });
+  if(!drop.length) return;
+  data.meals = data.meals.filter(function(m){ return (now - m.ts) <= limit; });
+  data.mealsCleanTs = now;
+  saveLocal();
+
+  var files = {};
+  drop.forEach(function(m){
+    files['p_' + m.id + '.txt'] = null;
+    delete photoCache[m.id];
+  });
+  if(cfg.mid){ gh('/gists/' + cfg.mid, 'PATCH', { files : files }).catch(function(){}); }
+  toast('清掉了 ' + drop.length + ' 张超过 30 天的三餐记录');
+  commit().catch(function(){});
 }
 
 /* ---------- 一起玩 ---------- */
@@ -1286,7 +1555,12 @@ function showView(name){
   });
   if(name === 'photo'){
     renderPhotos();
-    loadPhotos().catch(function(e){ toast(e.message); });
+    if(mealMode){
+      renderMeals();
+      loadMeals().then(function(){ renderMeals(); }).catch(function(e){ toast(e.message); });
+    }else{
+      loadPhotos().catch(function(e){ toast(e.message); });
+    }
   }
   if(name === 'games'){ renderGames(); }
   window.scrollTo(0, 0);
@@ -1299,7 +1573,10 @@ function boot(){
     $('#setup').classList.add('hidden');
     $('#main').classList.remove('hidden');
     render();
-    pull().then(function(){ render(); }).catch(function(){});
+    pull().then(function(){
+      if(!data.mealsCleanTs || (Date.now() - data.mealsCleanTs) > 86400000){ cleanupMeals(); }
+      render();
+    }).catch(function(){});
     setInterval(function(){
       if(document.visibilityState !== 'visible') return;
       pull().then(function(){ render(); }).catch(function(){});
@@ -1511,6 +1788,32 @@ $('#phAdd').addEventListener('click', function(){ $('#phFile').click(); });
 $('#phFile').addEventListener('change', function(e){
   uploadPhotos(e.target.files);
   e.target.value = '';
+});
+
+$('#segPhoto').addEventListener('click', function(){
+  mealMode = false;
+  $('#segPhoto').classList.add('on');
+  $('#segMeal').classList.remove('on');
+  $('#panePhoto').classList.remove('hidden');
+  $('#paneMeal').classList.add('hidden');
+  loadPhotos().catch(function(e){ toast(e.message); });
+});
+
+$('#segMeal').addEventListener('click', function(){
+  mealMode = true;
+  $('#segMeal').classList.add('on');
+  $('#segPhoto').classList.remove('on');
+  $('#paneMeal').classList.remove('hidden');
+  $('#panePhoto').classList.add('hidden');
+  renderMeals();
+  loadMeals().then(function(){ renderMeals(); }).catch(function(e){ toast(e.message); });
+});
+
+$('#mealFile').addEventListener('change', function(e){
+  var f = e.target.files && e.target.files[0];
+  var slot = window.__mealSlot || '早';
+  e.target.value = '';
+  if(f) addMeal(slot, f);
 });
 
 $('#btnTruth').addEventListener('click', function(){ drawCard('truth'); });
