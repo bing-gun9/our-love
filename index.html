@@ -74,6 +74,36 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
 .rps-btn{flex:1;padding:14px 0;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.05);color:#fff;font-size:24px;cursor:pointer;line-height:1;}
 .rps-btn.on{border-color:rgba(255,159,196,.8);background:rgba(255,159,196,.16);}
 .rps-out{font-size:12.5px;color:var(--muted);line-height:1.9;}
+/* ---------- 小火人房间 ---------- */
+.pet-stage{position:relative;height:42vh;min-height:260px;border-radius:18px;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;padding:6px 0 10px;
+  background:radial-gradient(110% 85% at 50% 28%, rgba(255,168,84,.20), rgba(16,12,26,.86) 68%);border:1px solid var(--line);}
+.pet-stage:after{content:"";position:absolute;left:0;right:0;bottom:0;height:38%;background:linear-gradient(to top, rgba(255,140,60,.10), transparent);pointer-events:none;}
+.pet-flame{position:relative;z-index:2;width:100%;display:flex;align-items:flex-end;justify-content:center;}
+.pet-flame svg{width:74%;max-width:300px;height:auto;animation:petFloat 3.4s ease-in-out infinite;cursor:pointer;will-change:transform;background:none;}
+@keyframes petFloat{0%,100%{transform:translateY(0) scale(1);}50%{transform:translateY(-9px) scale(1.02);}}
+.pet-stage:before{content:"";position:absolute;left:50%;top:46%;width:78%;height:62%;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(closest-side,rgba(255,176,90,.16),rgba(255,176,90,0));animation:petGlow 4.2s ease-in-out infinite;pointer-events:none;}
+@keyframes petGlow{0%,100%{opacity:.55;transform:translate(-50%,-50%) scale(1);}50%{opacity:1;transform:translate(-50%,-50%) scale(1.12);}}
+.pet-shadow{position:absolute;bottom:8px;left:50%;width:150px;height:20px;border-radius:50%;background:radial-gradient(closest-side,rgba(255,150,60,.38),rgba(255,150,60,0));animation:petShadow 3.4s ease-in-out infinite;}
+@keyframes petShadow{0%,100%{transform:translateX(-50%) scale(1);opacity:.9;}50%{transform:translateX(-50%) scale(.86);opacity:.62;}}
+.pet-bars{display:flex;gap:10px;margin-top:12px;}
+.pet-bar{flex:1;min-width:0;}
+.pet-bar span{font-size:10.5px;color:var(--muted);}
+.pet-bar .bond-bar{margin:4px 0 0;}
+.pet-say{margin-top:12px;font-size:13px;line-height:1.7;color:var(--text);background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-height:42px;}
+.pet-acts{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;}
+.pet-act{background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:13px;color:var(--text);font-family:inherit;padding:11px 2px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;}
+.pet-act:active{transform:scale(.96);}
+.pet-act b{font-size:19px;font-weight:400;}
+.pet-act span{font-size:11.5px;color:var(--muted);}
+.pet-foods{display:flex;gap:8px;margin-top:10px;}
+.pet-foods button{flex:1;background:rgba(255,159,196,.10);border:1px solid rgba(255,159,196,.4);border-radius:11px;color:var(--text);font-family:inherit;font-size:12px;padding:10px 2px;cursor:pointer;}
+.pet-chat{display:flex;flex-direction:column;gap:10px;}
+.pet-msg{max-width:84%;font-size:12.5px;line-height:1.65;padding:8px 11px;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid var(--line);}
+.pet-msg.pet{background:rgba(255,150,60,.14);border-color:rgba(255,150,60,.35);align-self:flex-start;border-bottom-left-radius:4px;}
+.pet-msg.me{align-self:flex-end;border-bottom-right-radius:4px;}
+.pet-msg .who{display:block;font-size:10px;color:var(--muted);margin-bottom:3px;}
+.pet-pop{position:absolute;left:50%;top:24%;transform:translateX(-50%);font-size:13px;font-weight:600;color:#ffd9a0;z-index:3;animation:petPop 1.15s ease-out forwards;pointer-events:none;white-space:nowrap;}
+@keyframes petPop{0%{opacity:0;transform:translate(-50%,6px) scale(.9);}22%{opacity:1;transform:translate(-50%,-6px) scale(1);}100%{opacity:0;transform:translate(-50%,-46px) scale(1);}}
 /* ---------- 第一次设置 ---------- */
 #setup{
   min-height:100vh;display:flex;flex-direction:column;justify-content:center;
@@ -604,7 +634,7 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
       <div class="set-row"><span>最近同步</span><b id="syncTime">-</b></div>
       <div class="set-row"><span>我的身份</span><b id="roleTxt">-</b></div>
       <div class="set-row"><span>空间编号</span><b id="gistId" style="font-size:11px">-</b></div>
-      <div class="set-row"><span>版本</span><b>v2.1</b></div>
+      <div class="set-row"><span>版本</span><b>v2.3</b></div>
       <div style="display:flex;gap:10px;margin-top:14px">
         <button class="btn small ghost" id="btnSync" style="flex:1">立即同步</button>
         <button class="btn small ghost" id="btnInvite" style="flex:1">复制邀请码</button>
@@ -736,6 +766,46 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
   </div>
 
 
+  <!-- 小火人 -->
+  <div id="view-pet" class="view wrap hidden">
+    <p class="sec-title">小火人 <span id="petLv" style="color:rgba(244,238,255,.5)">Lv 1</span></p>
+    <div class="card" style="padding:12px">
+      <div class="pet-stage" id="petStage">
+        <div class="pet-shadow"></div>
+        <div class="pet-flame" id="petFlame"></div>
+      </div>
+      <div class="pet-bars">
+        <div class="pet-bar"><span>饱</span><div class="bond-bar"><i id="barHunger" style="width:70%"></i></div></div>
+        <div class="pet-bar"><span>心情</span><div class="bond-bar"><i id="barMood" style="width:70%"></i></div></div>
+        <div class="pet-bar"><span>体力</span><div class="bond-bar"><i id="barEnergy" style="width:80%"></i></div></div>
+      </div>
+      <div class="pet-say" id="petSay">……</div>
+      <div class="cyc-add" style="margin-top:10px">
+        <input id="petInput" maxlength="40" placeholder="跟它说句话…">
+        <button class="btn small" id="petSend" type="button">说</button>
+      </div>
+    </div>
+
+    <p class="sec-title">陪它玩</p>
+    <div class="card">
+      <div class="pet-acts">
+        <button class="pet-act" id="petFeedBtn" type="button"><b>🍠</b><span>喂它</span></button>
+        <button class="pet-act" id="petTouchBtn" type="button"><b>✋</b><span>摸摸</span></button>
+        <button class="pet-act" id="petPlayBtn" type="button"><b>🎾</b><span>玩耍</span></button>
+        <button class="pet-act" id="petSleepBtn" type="button"><b>🌙</b><span>哄睡</span></button>
+      </div>
+      <div class="pet-foods hidden" id="petFoods">
+        <button type="button" data-food="🍬 棉花糖">🍬 棉花糖</button>
+        <button type="button" data-food="🍠 烤红薯">🍠 烤红薯</button>
+        <button type="button" data-food="🍰 小蛋糕">🍰 小蛋糕</button>
+      </div>
+      <p class="tip" id="petTip">它饿了自己会叫。你们两个喂都算数，谁喂得多它就更黏谁。</p>
+    </div>
+
+    <p class="sec-title">它说过的话</p>
+    <div class="card"><div class="pet-chat" id="petChat"></div></div>
+    <div style="height:20px"></div>
+  </div>
   <div id="sheetMask" class="sheet-mask"></div>
   <div id="sheet" class="sheet">
     <div class="sheet-grab"></div>
@@ -745,6 +815,7 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
       <button type="button" data-view="cycle"><span class="si">❀</span><span class="sl">生理期</span></button>
       <button type="button" data-view="like"><span class="si">♡</span><span class="sl">喜好</span></button>
       <button type="button" data-view="char"><span class="si">☺</span><span class="sl">角色</span></button>
+      <button type="button" data-view="pet"><span class="si">🔥</span><span class="sl">小火人</span></button>
       <button type="button" data-view="me"><span class="si">⚙</span><span class="sl">我们</span></button>
     </div>
   </div>
@@ -768,7 +839,7 @@ var API = 'https://api.github.com';
 var FILE_NAME = 'couple.json';
 var LS_CFG = 'lp_cfg_v1';
 var LS_DATA = 'lp_data_v1';
-var BUILD_ID = 'b20261110-0130';
+var BUILD_ID = 'b20261110-0230';
 
 var cfg = null;
 var data = null;
@@ -829,7 +900,9 @@ function loadLocal(){
   if(!data.meals) data.meals = [];
   if(!data.likes) data.likes = [];
   if(!data.char) data.char = { name : '小绒', face : '🐱', look : 'c1', style : '温柔', lines : [], hasAvatar : false, ts : 0 };
-  if(!data.char.look) data.char.look = 'c1';
+  if(!data.char.look) data.char.look = 'f1';
+  else if(/^c[1-8]$/.test(data.char.look)) data.char.look = 'f1';
+  else if(data.char.look === 'c9') data.char.look = 'f2';
   if(!data.char.lines) data.char.lines = [];
   if(!data.cycle || !data.cycle.records) data.cycle = { records : [], dur : 5 };
   if(!data.games) data.games = {};
@@ -924,13 +997,33 @@ function mergeRemote(remote){
   data.photos = mergeList(data.photos, remote.photos);
   data.meals = mergeList(data.meals, remote.meals);
   data.likes = mergeList(data.likes, remote.likes);
+  if(remote.pet){
+    var lp = petObj(), rp = remote.pet;
+    if((rp.ts || 0) > (lp.ts || 0)){
+      lp.hunger = typeof rp.hunger === "number" ? rp.hunger : lp.hunger;
+      lp.mood = typeof rp.mood === "number" ? rp.mood : lp.mood;
+      lp.energy = typeof rp.energy === "number" ? rp.energy : lp.energy;
+      lp.food = rp.food || lp.food;
+      lp.last = rp.last || lp.last;
+      lp.ts = rp.ts;
+    }
+    ["feeds", "plays", "pets"].forEach(function(k){
+      ["A", "B"].forEach(function(role){
+        var mine = (lp[k] || {})[role] || 0, other = (rp[k] || {})[role] || 0;
+        if(!lp[k]) lp[k] = {};
+        lp[k][role] = Math.max(mine, other);
+      });
+    });
+    lp.chats = mergeList(lp.chats || [], rp.chats || []);
+    if(lp.chats.length > 24) lp.chats = lp.chats.slice(0, 24);
+  }
   if(remote.char){
     var lc = data.char || {}, rc = remote.char;
     var newer = (rc.ts || 0) > (lc.ts || 0);
     data.char = {
       name : newer ? (rc.name || lc.name) : (lc.name || rc.name),
       face : newer ? (rc.face || lc.face) : (lc.face || rc.face),
-      look : newer ? (rc.look || lc.look || 'c1') : (lc.look || rc.look || 'c1'),
+      look : newer ? (rc.look || lc.look || 'f1') : (lc.look || rc.look || 'f1'),
       style : newer ? (rc.style || lc.style) : (lc.style || rc.style),
       hasAvatar : !!rc.hasAvatar,
       lines : mergeList(lc.lines || [], rc.lines || []),
@@ -1116,6 +1209,7 @@ function render(){
   if($('#view-cycle') && !$('#view-cycle').classList.contains('hidden')) renderCycle();
   if($('#view-like') && !$('#view-like').classList.contains('hidden')) renderLikes();
   renderChar();
+  if($('#view-pet') && !$('#view-pet').classList.contains('hidden')) renderPet();
   if($('#view-games') && !$('#view-games').classList.contains('hidden')) renderGames();
 }
 
@@ -2121,6 +2215,8 @@ var charAv = '';
 
 /* Q 版小人造型 */
 var CHAR_LOOKS = [
+  { id : 'f1', hair : '#ff9f43', cloth : '#ffd166', cut : 'flame' },
+  { id : 'f2', hair : '#ff9f43', cloth : '#b07a4f', cut : 'flamebear' },
   { id : 'c1', hair : '#3a2b3f', cloth : '#ff9eb5', cut : 'bob'  },
   { id : 'c2', hair : '#6b4226', cloth : '#a8d8f0', cut : 'twin' },
   { id : 'c3', hair : '#2b2b33', cloth : '#ffd76e', cut : 'bun'  },
@@ -2151,11 +2247,92 @@ function bearSvg(){
   return '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">' + s + '</svg>';
 }
 
+var flameSeq = 0;
+function flameMood(){
+  var b = bondObj(), t = todayStr();
+  var fa = (b.feeds.A && b.feeds.A.day === t) ? b.feeds.A.n : 0;
+  var fb = (b.feeds.B && b.feeds.B.day === t) ? b.feeds.B.n : 0;
+  if(!fa && !fb) return "hungry";
+  if(b.exp >= 500 || (fa && fb)) return "happy";
+  return "normal";
+}
+
+function flameSvg(mood, lv, bear){
+  flameSeq++;
+  var gid = "fg" + flameSeq;
+  var sc = lv >= 7 ? 1.05 : (lv >= 4 ? 1.0 : 0.94);
+  var s = "";
+  s += '<defs><radialGradient id="' + gid + '" cx="50%" cy="58%" r="66%">' +
+       '<stop offset="0%" stop-color="#fff8cf"/>' +
+       '<stop offset="42%" stop-color="#ffd76b"/>' +
+       '<stop offset="76%" stop-color="#ff9b3c"/>' +
+       '<stop offset="100%" stop-color="#f05f24"/>' +
+       '</radialGradient></defs>';
+  s += '<ellipse cx="50" cy="60" rx="36" ry="37" fill="#ff9a3c" opacity=".16"/>';
+  s += '<g transform="translate(50 52) scale(' + sc + ') translate(-50 -52)">';
+  /* 火苗主体 */
+  s += '<path d="M50 6 C 63 17, 77 35, 78 55 C 79 77, 65 92, 50 92 C 35 92, 21 77, 22 55 C 23 35, 37 17, 50 6 Z" fill="url(#' + gid + ')"/>';
+  /* 侧边小火苗尖 */
+  s += '<path d="M63 13 C 71 20, 76 31, 73 43 C 69 34, 66 26, 63 13 Z" fill="#ffbc55" opacity=".8"/>';
+  s += '<path d="M38 30 q9 -7 18 -3" stroke="#fff6d6" stroke-width="2" fill="none" opacity=".28" stroke-linecap="round"/>';
+  /* 手脚 */
+  s += '<circle cx="25" cy="72" r="6.4" fill="#ff8f3a"/>';
+  s += '<circle cx="75" cy="72" r="6.4" fill="#ff8f3a"/>';
+  s += '<circle cx="37" cy="89" r="5.4" fill="#f5873a"/>';
+  s += '<circle cx="63" cy="89" r="5.4" fill="#f5873a"/>';
+  /* 熊套装 */
+  if(bear){
+    s += '<circle cx="27" cy="24" r="9.5" fill="#a9714a"/><circle cx="73" cy="24" r="9.5" fill="#a9714a"/>';
+    s += '<circle cx="27" cy="24" r="5" fill="#e8c39e"/><circle cx="73" cy="24" r="5" fill="#e8c39e"/>';
+    s += '<path d="M30 36 q20 -10 40 0" stroke="#8f5f3e" stroke-width="2.4" fill="none"/>';
+    s += '<ellipse cx="50" cy="78" rx="9" ry="7" fill="#f4dcbb"/>';
+  }
+  /* 表情 */
+  if(mood === "happy"){
+    s += '<path d="M35 57 q5 -6 10 0" stroke="#53290f" stroke-width="2.8" fill="none" stroke-linecap="round"/>';
+    s += '<path d="M55 57 q5 -6 10 0" stroke="#53290f" stroke-width="2.8" fill="none" stroke-linecap="round"/>';
+    s += '<path d="M45 67 q5 6 10 0" stroke="#a23f14" stroke-width="2.2" fill="none" stroke-linecap="round"/>';
+  }else if(mood === "hungry"){
+    s += '<circle cx="40" cy="58" r="3" fill="#53290f"/><circle cx="60" cy="58" r="3" fill="#53290f"/>';
+    s += '<circle cx="40.8" cy="56.6" r="1" fill="#fff" opacity=".8"/><circle cx="60.8" cy="56.6" r="1" fill="#fff" opacity=".8"/>';
+    s += '<circle cx="39" cy="60" r="2.4" fill="#53290f"/><circle cx="61" cy="60" r="2.4" fill="#53290f"/>';
+    s += '<path d="M47 70 q3 -2 6 0" stroke="#a23f14" stroke-width="2" fill="none" stroke-linecap="round"/>';
+    s += '<circle cx="56" cy="74" r="1.2" fill="#8fd3ff" opacity=".85"/>';
+    s += '<ellipse cx="50" cy="70" rx="3.4" ry="4.4" fill="#a23f14" opacity=".55"/>';
+    }else if(mood === "sleepy"){
+    s += '<path d="M36 58 q4 3 8 0" stroke="#53290f" stroke-width="2.6" fill="none" stroke-linecap="round"/>';
+    s += '<path d="M56 58 q4 3 8 0" stroke="#53290f" stroke-width="2.6" fill="none" stroke-linecap="round"/>';
+    s += '<path d="M46 68 q4 2 8 0" stroke="#a23f14" stroke-width="2" fill="none" stroke-linecap="round"/>';
+    s += '<text x="76" y="34" font-size="10" fill="#ffd8a0">z</text><text x="82" y="26" font-size="8" fill="#ffd8a0">z</text>';
+  }else if(mood === "grumpy"){
+    s += '<path d="M34 51 l7 3" stroke="#53290f" stroke-width="2.2" fill="none"/>';
+    s += '<path d="M66 51 l-7 3" stroke="#53290f" stroke-width="2.2" fill="none"/>';
+    s += '<circle cx="40" cy="59" r="3.6" fill="#53290f"/><circle cx="60" cy="59" r="3.6" fill="#53290f"/>';
+    s += '<path d="M46 70 q4 -3 8 0" stroke="#a23f14" stroke-width="2.2" fill="none" stroke-linecap="round"/>';
+  }else{
+    s += '<circle cx="40" cy="57" r="4.4" fill="#53290f"/><circle cx="60" cy="57" r="4.4" fill="#53290f"/>';
+    s += '<circle cx="41.5" cy="55.5" r="1.5" fill="#fff"/><circle cx="61.5" cy="55.5" r="1.5" fill="#fff"/>';
+    s += '<path d="M45 67 q5 5 10 0" stroke="#a23f14" stroke-width="2.1" fill="none" stroke-linecap="round"/>';
+  }
+  /* 等级越高，火星越多 */
+  if(lv >= 4){
+    s += '<circle cx="82" cy="40" r="2.6" fill="#ffd166" opacity=".9"/>';
+    s += '<circle cx="18" cy="34" r="2" fill="#ffcf6b" opacity=".85" />';
+  }
+  if(lv >= 7){
+    s += '<circle cx="86" cy="26" r="1.8" fill="#ffe0a0" opacity=".8"/>';
+    s += '<circle cx="14" cy="52" r="1.6" fill="#ffe0a0" opacity=".8"/>';
+  }
+  s += '</g>';
+  return '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">' + s + '</svg>';
+}
+
 function chibiSvg(lookId){
   var L = null;
   for(var i = 0; i < CHAR_LOOKS.length; i++){ if(CHAR_LOOKS[i].id === lookId) L = CHAR_LOOKS[i]; }
   if(!L) L = CHAR_LOOKS[0];
   if(L.cut === 'bear') return bearSvg();
+  if(L.cut === 'flame' || L.cut === 'flamebear'){ return flameSvg(flameMood(), bondLv(), L.cut === 'flamebear'); }
   var hair = L.hair, cloth = L.cloth, skin = '#ffe3d3', blush = '#ff9fa8';
   var s = '';
 
@@ -2224,12 +2401,14 @@ function chibiSvg(lookId){
 }
 
 function defaultChar(){
-  return { name : '小绒', face : '🐱', look : 'c1', style : '温柔', lines : [], hasAvatar : false, ts : 0 };
+  return { name : '小绒', face : '🐱', look : 'f1', style : '温柔', lines : [], hasAvatar : false, ts : 0 };
 }
 function charObj(){
   if(!data.char) data.char = defaultChar();
   if(!data.char.lines) data.char.lines = [];
-  if(!data.char.look) data.char.look = 'c1';
+  if(!data.char.look) data.char.look = 'f1';
+  else if(/^c[1-8]$/.test(data.char.look)) data.char.look = 'f1';
+  else if(data.char.look === 'c9') data.char.look = 'f2';
   return data.char;
 }
 function otherRole(){ return myRole() === 'A' ? 'B' : 'A'; }
@@ -2271,6 +2450,7 @@ function sayLine(){
   var txt = '', i = 0, cur = $('#homeSay') ? $('#homeSay').textContent : '';
   do{
     var sp = charSpecial();
+    if(flameMood() === 'hungry' && Math.random() < 0.6){ txt = '我饿啦，喂我一口嘛。'; i++; continue; }
     if(sp && Math.random() < 0.7){
       txt = sp;
     }else if(c.lines.length && Math.random() < 0.55){
@@ -2299,6 +2479,7 @@ function renderChar(){
   if($('#charName') && document.activeElement !== $('#charName')) $('#charName').value = c.name || '';
   if($('#lineCount')) $('#lineCount').textContent = c.lines.length ? '· 共 ' + c.lines.length + ' 句' : '';
   renderBond();
+  if($('#homeSay') && !$('#view-home').classList.contains('hidden')){ $('#homeSay').textContent = petStatusText(); }
 
   var faceRow = $('#faceRow');
   if(faceRow){
@@ -2384,7 +2565,8 @@ function renderChar(){
   }
 }
 
-$('#homeTalk').addEventListener('click', sayLine);
+$('#homeTalk').addEventListener('click', function(){ showView('pet'); });
+$('#homeFace').addEventListener('click', function(){ showView('pet'); });
 $('#charSay').addEventListener('click', sayLine);
 $('#charFace').addEventListener('click', sayLine);
 
@@ -2600,8 +2782,247 @@ $("#qaSave").addEventListener("click", function(){
   toast("存好了");
 });
 
-/* ---------- 视图切换 ---------- *//* ---------- 视图切换 ---------- */
-var MENU_VIEWS = ['note', 'games', 'cycle', 'like', 'char', 'me'];
+/* ---------- 小火人 ---------- */
+var PET_FOODS = ["🍬 棉花糖", "🍠 烤红薯", "🍰 小蛋糕"];
+var PET_REPLY = [
+  { k : ["饿", "吃", "饭", "好吃", "馋"], r : ["我饿啦，先喂我一口嘛。", "想吃烤红薯…你上次喂的就是这个。", "你吃饭了吗？我也想吃。"] },
+  { k : ["想你", "爱", "喜欢", "宝"], r : ["嘿嘿，我也想你。", "被你这么说，我的火都旺了。", "那我今天一直贴着你。"] },
+  { k : ["累", "困", "睡", "熬夜", "晚安"], r : ["那你早点睡，我守着。", "别熬了，火苗也要休息。", "晚安，做一个暖和的梦。"] },
+  { k : ["难过", "哭", "烦", "委屈", "不开心", "emo"], r : ["抱抱，不哭。", "我在这儿，慢慢说。", "谁惹你了？我去烧他。"] },
+  { k : ["她", "ta", "TA", "小熊", "女朋友"], r : ["她今天还来看过我吗？", "你们俩我都喜欢。", "她摸我的时候手很轻。"] },
+  { k : ["你好", "在吗", "嗨", "在不在"], r : ["在的在的！", "我一直都在。", "你终于来啦。"] },
+  { k : ["干嘛", "忙", "做什么"], r : ["在这儿等你呀。", "晒火，顺便想你。", "刚打了个小盹儿。"] }
+];
+var PET_SURPRISE = ["嘿嘿。", "别戳我呀～", "痒！", "我在呢。", "今天也要开开心心的。"];
+
+function petObj(){
+  if(!data.pet){
+    data.pet = { hunger : 72, mood : 72, energy : 82, last : Date.now(), feeds : { A : 0, B : 0 }, plays : { A : 0, B : 0 }, pets : { A : 0, B : 0 }, food : "", chats : [], ts : 0 };
+  }
+  var p = data.pet;
+  if(!p.feeds) p.feeds = { A : 0, B : 0 };
+  if(!p.plays) p.plays = { A : 0, B : 0 };
+  if(!p.pets) p.pets = { A : 0, B : 0 };
+  if(!p.chats) p.chats = [];
+  return p;
+}
+function clamp(v, a, b){ return v < a ? a : (v > b ? b : v); }
+function petTick(){
+  var p = petObj();
+  var now = Date.now();
+  var h = (now - (p.last || now)) / 3600000;
+  if(h > 0.05){
+    p.hunger = clamp(p.hunger - h * 4.2, 0, 100);
+    p.mood = clamp(p.mood - h * 2.4, 0, 100);
+    p.energy = clamp(p.energy + h * 2.2, 0, 100);
+    if(p.hunger < 20) p.mood = Math.min(p.mood, 28);
+    p.last = now;
+    saveLocal();
+  }
+  return p;
+}
+function petState(){
+  var p = petObj();
+  var hr = new Date().getHours();
+  if(p.energy < 22 || hr >= 24 || hr < 6) return "sleepy";
+  if(p.hunger < 25) return "hungry";
+  if(p.mood < 25) return "grumpy";
+  if(p.mood > 72) return "happy";
+  return "normal";
+}
+function petStatusText(){
+  var st = petState(), p = petObj();
+  if(st === "sleepy") return "困得眼睛都睁不开了…（夜里它会想睡，点哄睡能回体力）";
+  if(st === "hungry") return "我饿啦，肚子里空空的，喂我一口吧。";
+  if(st === "grumpy") return "有点不开心…你好久没理我了。";
+  if(st === "happy"){
+    var fa = p.feeds.A || 0, fb = p.feeds.B || 0;
+    if(fa > fb) return "今天吃得很饱，最喜欢你喂我。";
+    if(fb > fa) return "她喂我的时候最温柔了。";
+    return "今天心情很好，想一直贴着你们。";
+  }
+  return "我在呢，摸摸我或者跟我说句话吧。";
+}
+
+function petPush(role, text){
+  var p = petObj();
+  p.chats.unshift({ id : uid(), role : role, text : text, ts : Date.now() });
+  if(p.chats.length > 24) p.chats = p.chats.slice(0, 24);
+  p.ts = Date.now();
+}
+
+function petReply(txt){
+  var low = txt.toLowerCase();
+  var st = petState();
+  if(st === "hungry" && Math.random() < 0.5) return "我饿着说话没力气…先喂我。";
+  for(var i = 0; i < PET_REPLY.length; i++){
+    for(var j = 0; j < PET_REPLY[i].k.length; j++){
+      if(low.indexOf(PET_REPLY[i].k[j].toLowerCase()) >= 0){
+        var arr = PET_REPLY[i].r;
+        return arr[Math.floor(Math.random() * arr.length)];
+      }
+    }
+  }
+  var p = petObj();
+  var fa = p.feeds.A || 0, fb = p.feeds.B || 0;
+  var total = fa + fb;
+  if(total > 0 && Math.random() < 0.35){
+    return "你们已经喂过我 " + total + " 次了，我记着的。";
+  }
+  var def = ["嘿嘿，我在听。", "你说，我听着呢。", "嗯…今天也想跟你多待一会儿。", "你说的我都记住了。", "再摸摸我就更开心了。"];
+  return def[Math.floor(Math.random() * def.length)];
+}
+
+function petPop(text){
+  var stage = $("#petStage");
+  if(!stage) return;
+  var el = document.createElement("div");
+  el.className = "pet-pop";
+  el.textContent = text;
+  stage.appendChild(el);
+  setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); }, 1200);
+}
+
+function renderPet(){
+  var p = petTick();
+  var lv = bondLv();
+  if($("#petLv")) $("#petLv").textContent = "Lv " + lv;
+  if($("#barHunger")) $("#barHunger").style.width = Math.round(p.hunger) + "%";
+  if($("#barMood")) $("#barMood").style.width = Math.round(p.mood) + "%";
+  if($("#barEnergy")) $("#barEnergy").style.width = Math.round(p.energy) + "%";
+
+  var flame = $("#petFlame");
+  if(flame){
+    var st = petState();
+    flame.innerHTML = flameSvg(st, lv, charObj().look === "f2");
+    var svg = flame.querySelector("svg");
+    if(svg){
+      svg.addEventListener("click", function(){
+        petTouch(true);
+      });
+    }
+  }
+
+  if($("#petSay")) $("#petSay").textContent = petStatusText();
+
+  var chat = $("#petChat");
+  if(chat){
+    chat.innerHTML = "";
+    if(!p.chats.length){
+      var e = document.createElement("div");
+      e.className = "pet-msg pet";
+      e.textContent = "我们刚认识，你可以先摸摸我。";
+      chat.appendChild(e);
+    }
+    p.chats.slice(0, 8).reverse().forEach(function(m){
+      var el = document.createElement("div");
+      el.className = "pet-msg " + (m.role === "pet" ? "pet" : "me");
+      var who = document.createElement("span");
+      who.className = "who";
+      who.textContent = m.role === "pet" ? (charObj().name || "小火人") : nameOf(m.role);
+      var tx = document.createElement("span");
+      tx.textContent = m.text;
+      el.appendChild(who);
+      el.appendChild(tx);
+      chat.appendChild(el);
+    });
+  }
+}
+
+function petTouch(fromClick){
+  var p = petObj(), st = petState();
+  if(st === "sleepy" && !fromClick){ toast("它睡着了，先哄睡吧"); return; }
+  var exp = 3;
+  p.pets[myRole()] = (p.pets[myRole()] || 0) + 1;
+  p.mood = clamp(p.mood + 8, 0, 100);
+  bondObj().exp += exp;
+  charObj().ts = Date.now();
+  var line = fromClick ? PET_SURPRISE[Math.floor(Math.random() * PET_SURPRISE.length)] : "唔…好舒服，再摸一会儿。";
+  petPush("pet", line);
+  saveLocal();
+  renderPet();
+  petPop("+" + exp);
+  commit().catch(function(e){ toast(e.message); });
+}
+
+function petFeed(food){
+  var p = petObj();
+  p.hunger = clamp(p.hunger + 26, 0, 100);
+  p.mood = clamp(p.mood + 8, 0, 100);
+  p.feeds[myRole()] = (p.feeds[myRole()] || 0) + 1;
+  p.food = food;
+  bondObj().exp += 9;
+  charObj().ts = Date.now();
+  petPush("pet", "好吃！" + food.replace(/^[^\u4e00-\u9fa5]*/, "") + "是最好吃的。");
+  saveLocal();
+  renderPet();
+  petPop("+9 饱了");
+  $("#petFoods").classList.add("hidden");
+  commit().catch(function(e){ toast(e.message); });
+}
+
+function petPlay(){
+  var p = petObj();
+  if(p.energy < 18){ toast("它没力气了，先哄睡吧"); return; }
+  p.energy = clamp(p.energy - 14, 0, 100);
+  p.mood = clamp(p.mood + 14, 0, 100);
+  p.plays[myRole()] = (p.plays[myRole()] || 0) + 1;
+  bondObj().exp += 7;
+  charObj().ts = Date.now();
+  petPush("pet", "再来一次！我要追那个球！");
+  saveLocal();
+  renderPet();
+  petPop("+7 开心");
+  commit().catch(function(e){ toast(e.message); });
+}
+
+function petSleep(){
+  var p = petObj();
+  p.energy = clamp(p.energy + 32, 0, 100);
+  p.mood = clamp(p.mood + 4, 0, 100);
+  bondObj().exp += 2;
+  charObj().ts = Date.now();
+  petPush("pet", "那我去眯一会儿，你别走太远。");
+  saveLocal();
+  renderPet();
+  petPop("+体力");
+  commit().catch(function(e){ toast(e.message); });
+}
+
+function petSend(){
+  var inp = $("#petInput");
+  if(!inp) return;
+  var v = inp.value.trim();
+  if(!v){ toast("先写一句"); return; }
+  petPush(myRole(), v);
+  var reply = petReply(v);
+  petPush("pet", reply);
+  inp.value = "";
+  saveLocal();
+  renderPet();
+  commit().catch(function(e){ toast(e.message); });
+}
+
+/* 绑定 */
+$("#petFeedBtn").addEventListener("click", function(){
+  var box = $("#petFoods");
+  if(!box) return;
+  if(petState() === "sleepy"){ toast("它睡着了，明天再喂吧"); return; }
+  box.classList.toggle("hidden");
+});
+$("#petFoods").addEventListener("click", function(e){
+  var b = e.target.closest("button[data-food]");
+  if(!b) return;
+  petFeed(b.getAttribute("data-food"));
+});
+$("#petTouchBtn").addEventListener("click", function(){ petTouch(false); });
+$("#petPlayBtn").addEventListener("click", function(){ petPlay(); });
+$("#petSleepBtn").addEventListener("click", function(){ petSleep(); });
+$("#petSend").addEventListener("click", petSend);
+$("#petInput").addEventListener("keydown", function(e){ if(e.key === "Enter"){ e.preventDefault(); petSend(); } });
+
+/* ---------- 视图切换 ---------- *//* ---------- 视图切换 ---------- *//* ---------- 视图切换 ---------- */
+var MENU_VIEWS = ['note', 'games', 'pet', 'cycle', 'like', 'char', 'me'];
 
 function openSheet(){ $('#sheet').classList.add('show'); $('#sheetMask').classList.add('show'); }
 function closeSheet(){ $('#sheet').classList.remove('show'); $('#sheetMask').classList.remove('show'); }
@@ -2626,6 +3047,7 @@ function showView(name){
     }
   }
   if(name === 'games'){ renderGames(); }
+  if(name === 'pet'){ renderPet(); }
   if(name === 'cycle'){ renderCycle(); }
   if(name === 'like'){ renderLikes(); }
   if(name === 'char'){ renderChar(); loadCharAvatar().then(renderChar).catch(function(e){ toast(e.message); }); }
