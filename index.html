@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -302,6 +302,7 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
   <div class="tabs2">
     <button id="tabCreate" class="on" type="button">我来创建</button>
     <button id="tabJoin" type="button">我有邀请码</button>
+    <button id="tabRestore" type="button">恢复本机</button>
   </div>
 
   <!-- 创建 -->
@@ -350,6 +351,16 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
     </div>
     <button class="btn" id="btnJoin" style="width:100%;margin-top:8px">加入我们的空间</button>
     <p class="tip">粘贴后会自动连上他创建的空间，之后你写的内容他那边几秒就能看到。</p>
+  </div>
+
+  <!-- 恢复 -->
+  <div id="paneRestore" class="hidden">
+    <div class="field">
+      <label>恢复码（只有你自己有，别发给她）</label>
+      <textarea id="inRestore" placeholder="把恢复码整段粘进来"></textarea>
+    </div>
+    <button class="btn" id="btnRestore" style="width:100%;margin-top:8px">恢复我的身份</button>
+    <p class="tip">用「我们」页里复制的恢复码。它会连回原来的空间，而且身份还是你自己，不会变成她。恢复码和邀请码不是一回事：邀请码是给人用的，恢复码只留给自己。</p>
   </div>
 </section>
 
@@ -485,12 +496,14 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
     <div class="card">
       <div class="set-row"><span>状态</span><b id="syncState">已连接</b></div>
       <div class="set-row"><span>最近同步</span><b id="syncTime">-</b></div>
+      <div class="set-row"><span>我的身份</span><b id="roleTxt">-</b></div>
       <div class="set-row"><span>空间编号</span><b id="gistId" style="font-size:11px">-</b></div>
-      <div class="set-row"><span>版本</span><b>v1.4</b></div>
+      <div class="set-row"><span>版本</span><b>v1.5</b></div>
       <div style="display:flex;gap:10px;margin-top:14px">
         <button class="btn small ghost" id="btnSync" style="flex:1">立即同步</button>
         <button class="btn small ghost" id="btnInvite" style="flex:1">复制邀请码</button>
       </div>
+      <button class="btn small ghost" id="btnResume" style="width:100%;margin-top:10px">复制恢复码（自己留着）</button>
     </div>
 
     <p class="sec-title">其他</p>
@@ -499,7 +512,7 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
         <button class="btn small ghost" id="btnExport" style="flex:1">导出备份</button>
         <button class="btn small ghost" id="btnReset" style="flex:1">解绑本机</button>
       </div>
-      <p class="tip">「解绑本机」只清除这台手机上的数据和 Token，云端的日记不会丢，重新粘贴邀请码就能回来。</p>
+      <p class="tip">「解绑本机」只清除这台手机上的数据和 Token，云端的日记不会丢。想回来时请用「恢复本机」粘恢复码，不要用邀请码（那会把你变成她的身份）。</p>
     </div>
     <div style="height:20px"></div>
   </div>
@@ -525,7 +538,7 @@ var API = 'https://api.github.com';
 var FILE_NAME = 'couple.json';
 var LS_CFG = 'lp_cfg_v1';
 var LS_DATA = 'lp_data_v1';
-var BUILD_ID = 'b20261109-1400';
+var BUILD_ID = 'b20261109-1600';
 
 var cfg = null;
 var data = null;
@@ -907,6 +920,7 @@ function renderSettings(){
   if(document.activeElement !== $('#setNext')) $('#setNext').value = m.nextMeet || '';
   if(document.activeElement !== $('#setKm')) $('#setKm').value = m.distanceKm || '';
   if($('#gistId')) $('#gistId').textContent = (cfg && cfg.gistId) ? cfg.gistId : '-';
+  if($('#roleTxt')) $('#roleTxt').textContent = (cfg && cfg.gistId) ? (nameOf(myRole()) + '（我）') : '-';
   setSyncUI(syncing ? 'wait' : 'ok');
 }
 
@@ -1613,18 +1627,17 @@ function boot(){
 }
 
 /* =====================  首次设置交互  ===================== */
-$('#tabCreate').addEventListener('click', function(){
-  $('#tabCreate').classList.add('on');
-  $('#tabJoin').classList.remove('on');
-  $('#paneCreate').classList.remove('hidden');
-  $('#paneJoin').classList.add('hidden');
-});
-$('#tabJoin').addEventListener('click', function(){
-  $('#tabJoin').classList.add('on');
-  $('#tabCreate').classList.remove('on');
-  $('#paneJoin').classList.remove('hidden');
-  $('#paneCreate').classList.add('hidden');
-});
+function setupTab(which){
+  ['Create', 'Join', 'Restore'].forEach(function(k){
+    var tab = document.getElementById('tab' + k);
+    var pane = document.getElementById('pane' + k);
+    if(tab) tab.classList.toggle('on', k === which);
+    if(pane) pane.classList.toggle('hidden', k !== which);
+  });
+}
+$('#tabCreate').addEventListener('click', function(){ setupTab('Create'); });
+$('#tabJoin').addEventListener('click', function(){ setupTab('Join'); });
+if($('#tabRestore')) $('#tabRestore').addEventListener('click', function(){ setupTab('Restore'); });
 
 $('#btnCreate').addEventListener('click', function(){
   var token = $('#inToken').value.trim();
@@ -1710,9 +1723,60 @@ $('#btnJoin').addEventListener('click', function(){
   });
 });
 
+/* 恢复本机（保留自己的身份） */
+$('#btnRestore').addEventListener('click', function(){
+  var raw = $('#inRestore').value.trim();
+  if(!raw){ toast('先粘贴恢复码'); return; }
+  var obj = null;
+  try{
+    obj = JSON.parse(decodeURIComponent(escape(atob(raw.replace(/\s+/g, '') || ''))));
+  }catch(e){ obj = null; }
+  if(!obj || !obj.token || !obj.id){
+    toast('这不是恢复码，检查一下是不是复制少了');
+    return;
+  }
+
+  var btn = this;
+  btn.disabled = true;
+  btn.textContent = '恢复中…';
+
+  cfg = { token : obj.token, gistId : obj.id, role : (obj.role === 'B' ? 'B' : 'A') };
+  data = defaultData();
+  gh('/user').then(function(){
+    return pull();
+  }).then(function(ok){
+    if(ok === false) throw new Error('这个空间里没有内容，恢复码可能不完整');
+    saveLocal();
+    $('#setup').classList.add('hidden');
+    $('#main').classList.remove('hidden');
+    render();
+    toast('回来了，你的身份是「' + nameOf(myRole()) + '」');
+  }).catch(function(e){
+    cfg = null;
+    data = defaultData();
+    btn.disabled = false;
+    btn.textContent = '恢复我的身份';
+    toast(e.message || '恢复失败：Token 失效或恢复码不对');
+  });
+});
+
 /* ---------- 生成邀请码 ---------- */
 function inviteCode(){
   var payload = JSON.stringify({ token : cfg.token, id : cfg.gistId });
+  return btoa(unescape(encodeURIComponent(payload)));
+}
+
+/* 恢复码：带自己的角色，只留给自己用 */
+function resumeCode(){
+  var payload = JSON.stringify({
+    token : cfg.token,
+    id : cfg.gistId,
+    role : myRole(),
+    nA : data.meta.nameA,
+    nB : data.meta.nameB,
+    start : data.meta.start,
+    key : 'mine'
+  });
   return btoa(unescape(encodeURIComponent(payload)));
 }
 
@@ -1786,6 +1850,31 @@ $('#btnInvite').addEventListener('click', function(){
     }
     box.textContent = code;
   }
+});
+
+$('#btnResume').addEventListener('click', function(){
+  var code = resumeCode();
+  var el = document.createElement('textarea');
+  el.value = code;
+  document.body.appendChild(el);
+  el.select();
+  try{
+    document.execCommand('copy');
+    toast('恢复码已复制，存到自己手机里，别发给她');
+  }catch(e){
+    toast('复制不了，下面这串自己截图存着');
+  }
+  document.body.removeChild(el);
+
+  var box = $('#resumeBox');
+  if(!box){
+    box = document.createElement('div');
+    box.id = 'resumeBox';
+    box.className = 'code';
+    box.style.wordBreak = 'break-all';
+    $('#view-me').appendChild(box);
+  }
+  box.textContent = code;
 });
 
 $('#btnExport').addEventListener('click', function(){
