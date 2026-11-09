@@ -498,12 +498,13 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
       <div class="set-row"><span>最近同步</span><b id="syncTime">-</b></div>
       <div class="set-row"><span>我的身份</span><b id="roleTxt">-</b></div>
       <div class="set-row"><span>空间编号</span><b id="gistId" style="font-size:11px">-</b></div>
-      <div class="set-row"><span>版本</span><b>v1.5</b></div>
+      <div class="set-row"><span>版本</span><b>v1.6</b></div>
       <div style="display:flex;gap:10px;margin-top:14px">
         <button class="btn small ghost" id="btnSync" style="flex:1">立即同步</button>
         <button class="btn small ghost" id="btnInvite" style="flex:1">复制邀请码</button>
       </div>
       <button class="btn small ghost" id="btnResume" style="width:100%;margin-top:10px">复制恢复码（自己留着）</button>
+      <button class="btn small ghost" id="btnFlipRole" style="width:100%;margin-top:10px">我和 TA 显示反了？点这里纠正</button>
     </div>
 
     <p class="sec-title">其他</p>
@@ -538,7 +539,7 @@ var API = 'https://api.github.com';
 var FILE_NAME = 'couple.json';
 var LS_CFG = 'lp_cfg_v1';
 var LS_DATA = 'lp_data_v1';
-var BUILD_ID = 'b20261109-1600';
+var BUILD_ID = 'b20261109-1700';
 
 var cfg = null;
 var data = null;
@@ -1875,6 +1876,16 @@ $('#btnResume').addEventListener('click', function(){
     $('#view-me').appendChild(box);
   }
   box.textContent = code;
+});
+
+$('#btnFlipRole').addEventListener('click', function(){
+  if(!cfg || !cfg.gistId){ toast('还没连上空间'); return; }
+  if(!confirm('只在「把你和 TA 显示反了」的时候用。确定要切换身份吗？')) return;
+  var before = myRole();
+  cfg.role = (before === 'A' ? 'B' : 'A');
+  saveLocal();
+  render();
+  toast('已纠正，你现在是「' + nameOf(myRole()) + '」');
 });
 
 $('#btnExport').addEventListener('click', function(){
