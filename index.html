@@ -725,7 +725,7 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
       <div class="set-row"><span>最近同步</span><b id="syncTime">-</b></div>
       <div class="set-row"><span>我的身份</span><b id="roleTxt">-</b></div>
       <div class="set-row"><span>空间编号</span><b id="gistId" style="font-size:11px">-</b></div>
-      <div class="set-row"><span>版本</span><b>v3.2</b></div>
+      <div class="set-row"><span>版本</span><b>v3.3</b></div>
       <div style="display:flex;gap:10px;margin-top:14px">
         <button class="btn small ghost" id="btnSync" style="flex:1">立即同步</button>
         <button class="btn small ghost" id="btnInvite" style="flex:1">复制邀请码</button>
@@ -791,6 +791,7 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
     <div class="card">
       <div class="set-row"><span>周期长度</span><div class="set-unit"><input class="set-input" id="cycLen" type="number" min="18" max="60" placeholder="自动"><b>天</b></div></div>
       <div class="set-row"><span>经期长度</span><div class="set-unit"><input class="set-input" id="cycDur" type="number" min="1" max="10" placeholder="5"><b>天</b></div></div>
+      <p class="hint">改完不用等，日历上的粉色格子会立刻跟着变长或变短（1–10 天）。</p>
       <p class="tip">留空就按你记过的日子自己算平均。填了就是你说了算。</p>
     </div>
 
@@ -976,7 +977,7 @@ var API = 'https://api.github.com';
 var FILE_NAME = 'couple.json';
 var LS_CFG = 'lp_cfg_v1';
 var LS_DATA = 'lp_data_v1';
-var BUILD_ID = 'b20261110-1000';
+var BUILD_ID = 'b20261110-1100';
 
 var cfg = null;
 var data = null;
@@ -2293,7 +2294,6 @@ function renderCycle(){
   $("#cycCount").textContent = st.records.length ? "· 共 " + st.records.length + " 次" : "";
   if($("#cycLen") && document.activeElement !== $("#cycLen")) $("#cycLen").value = c.len ? c.len : "";
   if($("#cycDur") && document.activeElement !== $("#cycDur")) $("#cycDur").value = c.dur || 5;
-  if($("#cycLen") && document.activeElement !== $("#cycLen")) $("#cycLen").value = c.len ? c.len : "";
 
   if(!st.has){
     $("#cycDay").textContent = "--";
@@ -3963,6 +3963,31 @@ $("#cycDur").addEventListener("change", function(){
   var use = (v >= 1 && v <= 10) ? v : 5;
   act(function(){ c.dur = use; c.dts = Date.now(); });
   renderCycle();
+});
+$("#cycDur").addEventListener("input", function(){
+  var self = this;
+  clearTimeout(window.__durT);
+  window.__durT = setTimeout(function(){
+    var v = parseInt(self.value, 10);
+    if(!(v >= 1 && v <= 10)) return;
+    var c = cycleObj();
+    if(c.dur === v) return;
+    act(function(){ c.dur = v; c.dts = Date.now(); });
+    renderCycle();
+  }, 350);
+});
+$("#cycLen").addEventListener("input", function(){
+  var self = this;
+  clearTimeout(window.__lenT);
+  window.__lenT = setTimeout(function(){
+    var v = parseInt(self.value, 10);
+    var use = (!self.value) ? 0 : ((v >= 18 && v <= 60) ? v : null);
+    if(use === null) return;
+    var c = cycleObj();
+    if(c.len === use) return;
+    act(function(){ c.len = use; c.dts = Date.now(); });
+    renderCycle();
+  }, 350);
 });
 
 $('#likeOpen').addEventListener('click', function(){
