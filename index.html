@@ -741,7 +741,7 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
       <div class="set-row"><span>最近同步</span><b id="syncTime">-</b></div>
       <div class="set-row"><span>我的身份</span><b id="roleTxt">-</b></div>
       <div class="set-row"><span>空间编号</span><b id="gistId" style="font-size:11px">-</b></div>
-      <div class="set-row"><span>版本</span><b>v3.6</b></div>
+      <div class="set-row"><span>版本</span><b>v3.8</b></div>
       <div style="display:flex;gap:10px;margin-top:14px">
         <button class="btn small ghost" id="btnSync" style="flex:1">立即同步</button>
         <button class="btn small ghost" id="btnInvite" style="flex:1">复制邀请码</button>
@@ -807,7 +807,8 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
     <div class="card">
       <div class="set-row"><span>周期长度</span><div class="set-unit"><input class="set-input" id="cycLen" type="number" min="18" max="60" placeholder="自动"><b>天</b></div></div>
       <div class="set-row"><span>经期长度</span><div class="set-unit"><input class="set-input" id="cycDur" type="number" min="1" max="10" placeholder="5"><b>天</b></div></div>
-      <p class="hint">改完不用等，日历上的粉色格子会立刻跟着变长或变短（1–10 天）。</p>
+      <div class="set-row"><span>排卵期长度</span><div class="set-unit"><input class="set-input" id="cycOvuLen" type="number" min="1" max="10" placeholder="7"><b>天</b></div></div>
+      <p class="hint">改完不用等，日历上的粉色格子会立刻跟着变长或变短（1–10 天）；紫色格子（易孕期）同理，以排卵日往前推「排卵期长度」天。</p>
       <p class="tip">留空就按你记过的日子自己算平均。填了就是你说了算。</p>
     </div>
 
@@ -1002,7 +1003,7 @@ var API = 'https://api.github.com';
 var FILE_NAME = 'couple.json';
 var LS_CFG = 'lp_cfg_v1';
 var LS_DATA = 'lp_data_v1';
-var BUILD_ID = 'b20261110-1400';
+var BUILD_ID = 'b20261110-1600';
 
 var cfg = null;
 var data = null;
@@ -1219,6 +1220,7 @@ function mergeRemote(remote){
     if((remote.cycle.dts || 0) > (data.cycle.dts || 0)){
       data.cycle.len = remote.cycle.len || 0;
       data.cycle.dur = remote.cycle.dur || 5;
+      data.cycle.ovuLen = remote.cycle.ovuLen || 7;
       data.cycle.dts = remote.cycle.dts;
     }
   }
@@ -2163,8 +2165,8 @@ function cycleStats(){
     return a.start < b.start ? -1 : (a.start > b.start ? 1 : 0);
   });
   var dur = c.dur || 5;
-  var avg = 28;
-  if(recs.length >= 2){
+  var avg = c.len || 28;
+  if(recs.length >= 2 && !c.len){
     var spans = [];
     for(var i = 1; i < recs.length; i++){
       var d = Math.round((parseDate(recs[i].start) - parseDate(recs[i - 1].start)) / 86400000);
@@ -2207,6 +2209,7 @@ function cycleObj(){
   if(!data.cycle.rid) data.cycle.rid = {};
   if(!data.cycle.ovid) data.cycle.ovid = {};
   if(!data.cycle.sym) data.cycle.sym = {};
+  if(!data.cycle.ovuLen) data.cycle.ovuLen = 7;
   return data.cycle;
 }
 function calKey(d){ return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
@@ -2214,7 +2217,7 @@ function dayAfter(d, n){ return new Date(d.getTime() + n * 86400000); }
 
 function calMarks(){
   var c = cycleObj(), st = cycleStats();
-  var avg = c.len || st.avg || 28, dur = c.dur || 5;
+  var avg = c.len || st.avg || 28, dur = c.dur || 5, oLen = c.ovuLen || 7;
   var marks = {};
   function set(k, f){ if(!marks[k]) marks[k] = {}; marks[k][f] = 1; }
 
@@ -2252,7 +2255,7 @@ function calMarks(){
   oList.forEach(function(ov){
     var k = calKey(ov);
     if(!marks[k] || !marks[k].p) set(k, "o");
-    for(var i = -5; i <= 1; i++){
+    for(var i = -(oLen - 1); i <= 0; i++){
       var kk = calKey(dayAfter(ov, i));
       if(!marks[kk] || (!marks[kk].p && !marks[kk].o)) set(kk, "f");
     }
@@ -2320,6 +2323,7 @@ function renderCycle(){
   $("#cycCount").textContent = st.records.length ? "· 共 " + st.records.length + " 次" : "";
   if($("#cycLen") && document.activeElement !== $("#cycLen")) $("#cycLen").value = c.len ? c.len : "";
   if($("#cycDur") && document.activeElement !== $("#cycDur")) $("#cycDur").value = c.dur || 5;
+  if($("#cycOvuLen") && document.activeElement !== $("#cycOvuLen")) $("#cycOvuLen").value = c.ovuLen || 7;
 
   if(!st.has){
     $("#cycDay").textContent = "--";
@@ -4187,6 +4191,26 @@ $("#cycDur").addEventListener("input", function(){
     renderCycle();
   }, 350);
 });
+$("#cycOvuLen").addEventListener("change", function(){
+  var v = parseInt(this.value, 10);
+  var c = cycleObj();
+  var use = (v >= 1 && v <= 10) ? v : 7;
+  act(function(){ c.ovuLen = use; c.dts = Date.now(); });
+  renderCycle();
+});
+$("#cycOvuLen").addEventListener("input", function(){
+  var self = this;
+  clearTimeout(window.__ovuT);
+  window.__ovuT = setTimeout(function(){
+    var v = parseInt(self.value, 10);
+    if(!(v >= 1 && v <= 10)) return;
+    var c = cycleObj();
+    if(c.ovuLen === v) return;
+    act(function(){ c.ovuLen = v; c.dts = Date.now(); });
+    renderCycle();
+  }, 350);
+});
+
 $("#cycLen").addEventListener("input", function(){
   var self = this;
   clearTimeout(window.__lenT);
