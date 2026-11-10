@@ -741,7 +741,7 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
       <div class="set-row"><span>最近同步</span><b id="syncTime">-</b></div>
       <div class="set-row"><span>我的身份</span><b id="roleTxt">-</b></div>
       <div class="set-row"><span>空间编号</span><b id="gistId" style="font-size:11px">-</b></div>
-      <div class="set-row"><span>版本</span><b>v3.5</b></div>
+      <div class="set-row"><span>版本</span><b>v3.6</b></div>
       <div style="display:flex;gap:10px;margin-top:14px">
         <button class="btn small ghost" id="btnSync" style="flex:1">立即同步</button>
         <button class="btn small ghost" id="btnInvite" style="flex:1">复制邀请码</button>
@@ -890,6 +890,7 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
         <input type="file" id="charFile" accept="image/*" style="display:none">
       </div>
 
+      <p class="tip" style="margin:10px 0 12px">这里选它的样子和说话风格；衣服（小熊装、熊猫装等）在「更多 → 小火人」的衣柜里换。</p>
       <div class="field" style="margin-bottom:0">
         <label>说话风格</label>
         <div class="face-row" id="styleRow"></div>
@@ -902,11 +903,9 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
       <div class="bond-bar"><i id="bondBar" style="width:0%"></i></div>
       <div class="wt-sub" id="bondTip">还差 100 点升到下一级</div>
       <div class="bond-row">
-        <button class="bond-btn" id="bondFeed" type="button">喂一口</button>
-        <button class="bond-btn" id="bondPat" type="button">顺顺毛</button>
-        <button class="bond-btn" id="bondPlay" type="button">陪它玩</button>
+        <button class="bond-btn" id="bondGoPet" type="button" style="flex:1">去小火人房间陪它</button>
       </div>
-      <p class="tip">每人每天能喂 1 次、顺毛 3 次、陪玩 2 次。喂得越勤，它说话越黏、越会撒娇。</p>
+      <p class="tip">喂饭、摸摸、抛球、洗澡、挠痒、唱歌、散步、换衣服都在「更多 → 小火人」里，这里只看等级。</p>
     </div>
     <p class="sec-title">它自己会说的话 <span id="lineCount" style="color:rgba(244,238,255,.45)"></span></p>
     <div class="card">
@@ -1003,7 +1002,7 @@ var API = 'https://api.github.com';
 var FILE_NAME = 'couple.json';
 var LS_CFG = 'lp_cfg_v1';
 var LS_DATA = 'lp_data_v1';
-var BUILD_ID = 'b20261110-1300';
+var BUILD_ID = 'b20261110-1400';
 
 var cfg = null;
 var data = null;
@@ -2925,6 +2924,13 @@ function defaultChar(){
 function charObj(){
   if(!data.char) data.char = defaultChar();
   if(!data.char.lines) data.char.lines = [];
+  data.char.lines = data.char.lines.map(function(it){
+    if(typeof it === "string") return { id : uid(), role : "A", text : it, ts : Date.now() };
+    if(it && !it.id) it.id = uid();
+    if(it && !it.role) it.role = "A";
+    if(it && typeof it.text !== "string") it.text = String(it.text == null ? "" : it.text);
+    return it;
+  }).filter(function(it){ return it && it.text; });
   if(!data.char.look) data.char.look = 'f1';
   if(!data.char.outfit) data.char.outfit = 'none';
   else if(/^c[1-8]$/.test(data.char.look)) data.char.look = 'f1';
@@ -3411,9 +3417,7 @@ function renderQA(){
 }
 
 /* ---------- 绑定 ---------- */
-$("#bondFeed").addEventListener("click", function(){ bondDo("feeds", 1, 10, "它吃得很香"); });
-$("#bondPat").addEventListener("click", function(){ bondDo("pats", 3, 4, "它被顺毛了"); });
-$("#bondPlay").addEventListener("click", function(){ bondDo("plays", 2, 6, "它玩得很疯"); });
+$("#bondGoPet").addEventListener("click", function(){ showView("pet"); });
 
 $("#qaSave").addEventListener("click", function(){
   var v = $("#qaInput").value.trim();
