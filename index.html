@@ -35,16 +35,18 @@ body{
 ::-webkit-scrollbar{width:0;}
 
 input[type="date"],input[type="time"],input[type="datetime-local"],input[type="month"]{
-  background:rgba(255,255,255,.10);
-  border:1px solid rgba(255,255,255,.26);
+  background:linear-gradient(180deg,rgba(255,255,255,.20),rgba(255,255,255,.13));
+  border:1.5px solid rgba(255,255,255,.46);
+  box-shadow:0 1px 0 rgba(255,255,255,.10) inset,0 6px 16px rgba(0,0,0,.22);
   color:var(--text);
-  min-height:46px;
+  min-height:48px;
   padding:10px 12px;
-  font-weight:500;
+  font-weight:600;
 }
 input[type="date"]:focus,input[type="time"]:focus,input[type="datetime-local"]:focus,input[type="month"]:focus{
-  background:rgba(255,255,255,.14);
-  border-color:rgba(255,159,196,.75);
+  background:linear-gradient(180deg,rgba(255,255,255,.26),rgba(255,255,255,.17));
+  border-color:rgba(255,159,196,.9);
+  box-shadow:0 0 0 3px rgba(255,111,145,.22);
 }
 input[type="date"]::-webkit-datetime-edit,
 input[type="time"]::-webkit-datetime-edit,
@@ -56,9 +58,10 @@ input[type="date"]::-webkit-calendar-picker-indicator,
 input[type="time"]::-webkit-calendar-picker-indicator,
 input[type="datetime-local"]::-webkit-calendar-picker-indicator,
 input[type="month"]::-webkit-calendar-picker-indicator{
-  filter:invert(1) brightness(1.5);
-  opacity:.92;
+  filter:invert(1) brightness(2.4) drop-shadow(0 0 3px rgba(255,255,255,.5));
+  opacity:1;
   cursor:pointer;
+  width:22px;height:22px;margin-left:6px;
 }
 /* ---------- 通用 ---------- */
 .wrap{padding:0 18px;}
@@ -126,7 +129,8 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
 .cal-ops-btns button#calMarkO{border-color:rgba(150,120,255,.5);background:rgba(150,120,255,.12);}
 .cal-ops-btns button#calMarkX{color:var(--muted);}
 .set-unit{display:flex;align-items:center;gap:6px;}
-.set-input{width:70px;height:30px;border-radius:9px;border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--text);font-family:inherit;font-size:12px;text-align:center;}
+.set-input{width:74px;height:34px;border-radius:10px;border:1.5px solid rgba(255,255,255,.42);background:rgba(255,255,255,.16);color:#fff;font-family:inherit;font-size:13px;font-weight:700;text-align:center;box-shadow:0 1px 0 rgba(255,255,255,.12) inset;}
+.set-input:focus{outline:none;border-color:rgba(255,159,196,.9);box-shadow:0 0 0 3px rgba(255,111,145,.22);background:rgba(255,255,255,.24);}
 .cyc-legend{flex-wrap:wrap;gap:10px;}
 .lg-pp{background:rgba(255,95,140,.16);border:1px dashed rgba(255,120,160,.6);}
 /* ---------- 小火人房间 ---------- */
@@ -494,10 +498,10 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
   border:1px solid rgba(255,159,196,.4);color:#ffc9da;}
 .sym-label{font-size:11.5px;letter-spacing:.1em;color:var(--muted);margin:0 0 8px;}
 .sym-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;}
-.sym-chip{font-family:inherit;font-size:12.5px;padding:7px 12px;border-radius:999px;cursor:pointer;
-  border:1px solid var(--line);background:rgba(255,255,255,.05);color:rgba(244,238,255,.72);transition:.15s;}
+.sym-chip{font-family:inherit;font-size:12.5px;padding:8px 13px;border-radius:999px;cursor:pointer;
+  border:1.5px solid rgba(255,255,255,.34);background:rgba(255,255,255,.11);color:rgba(244,238,255,.9);transition:.15s;}
 .sym-chip.on{background:linear-gradient(135deg,rgba(255,214,166,.28),rgba(255,111,145,.34));
-  border-color:rgba(255,111,145,.6);color:#fff;font-weight:600;}
+  border-color:rgba(255,111,145,.85);color:#fff;font-weight:700;box-shadow:0 0 0 3px rgba(255,111,145,.18);}
 .sym-note{margin:-4px 0 14px;font-size:13px;padding:11px 13px;border-radius:12px;line-height:1.75;min-height:58px;resize:none;}
 .sym-note:focus{background:rgba(255,255,255,.14);}
 .sym-divider{height:1px;background:var(--line);margin:4px 0 14px;}
@@ -741,7 +745,7 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
       <div class="set-row"><span>最近同步</span><b id="syncTime">-</b></div>
       <div class="set-row"><span>我的身份</span><b id="roleTxt">-</b></div>
       <div class="set-row"><span>空间编号</span><b id="gistId" style="font-size:11px">-</b></div>
-      <div class="set-row"><span>版本</span><b>v3.8</b></div>
+      <div class="set-row"><span>版本</span><b>v3.9</b></div>
       <div style="display:flex;gap:10px;margin-top:14px">
         <button class="btn small ghost" id="btnSync" style="flex:1">立即同步</button>
         <button class="btn small ghost" id="btnInvite" style="flex:1">复制邀请码</button>
@@ -1003,7 +1007,7 @@ var API = 'https://api.github.com';
 var FILE_NAME = 'couple.json';
 var LS_CFG = 'lp_cfg_v1';
 var LS_DATA = 'lp_data_v1';
-var BUILD_ID = 'b20261110-1600';
+var BUILD_ID = 'b20261110-1700';
 
 var cfg = null;
 var data = null;
