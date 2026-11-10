@@ -745,7 +745,7 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
       <div class="set-row"><span>最近同步</span><b id="syncTime">-</b></div>
       <div class="set-row"><span>我的身份</span><b id="roleTxt">-</b></div>
       <div class="set-row"><span>空间编号</span><b id="gistId" style="font-size:11px">-</b></div>
-      <div class="set-row"><span>版本</span><b>v3.9</b></div>
+      <div class="set-row"><span>版本</span><b>v4.0</b></div>
       <div style="display:flex;gap:10px;margin-top:14px">
         <button class="btn small ghost" id="btnSync" style="flex:1">立即同步</button>
         <button class="btn small ghost" id="btnInvite" style="flex:1">复制邀请码</button>
@@ -761,6 +761,31 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
         <button class="btn small ghost" id="btnReset" style="flex:1">解绑本机</button>
       </div>
       <p class="tip">「解绑本机」只清除这台手机上的数据和 Token，云端的日记不会丢。想回来时请用「恢复本机」粘恢复码，不要用邀请码（那会把你变成她的身份）。</p>
+    </div>
+    <div style="height:20px"></div>
+  </div>
+
+  <!-- 设备状态 -->
+  <div id="view-device" class="view wrap hidden">
+    <p class="sec-title">TA 现在</p>
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:10px;margin:2px 0 12px">
+        <span id="devDot" style="width:11px;height:11px;border-radius:50%;background:rgba(255,255,255,.3)"></span>
+        <b id="devState" style="font-size:17px">还没来过</b>
+      </div>
+      <div class="set-row"><span>最后活跃</span><b id="devLast">-</b></div>
+      <div class="set-row"><span>用的设备</span><b id="devDev">-</b></div>
+      <div class="set-row"><span>TA 的版本</span><b id="devVer">-</b></div>
+    </div>
+
+    <p class="sec-title">这台手机</p>
+    <div class="card">
+      <div class="set-row"><span>设备</span><b id="meDev">-</b></div>
+      <div class="set-row"><span>版本</span><b id="meVer">-</b></div>
+      <div class="set-row"><span>我的最后活跃</span><b id="meLast">-</b></div>
+      <div class="set-row"><span>最近同步</span><b id="meSync">-</b></div>
+      <button class="btn small ghost" id="devRefresh" style="width:100%;margin-top:14px">刷新一下</button>
+      <p class="tip">页面开着就每分钟报一次「我还在」，关掉之后只能看到最后活跃时间。两边都开着这页，大约 10 秒内互相就能看到在线。</p>
     </div>
     <div style="height:20px"></div>
   </div>
@@ -985,6 +1010,7 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
       <button type="button" data-view="char"><span class="si">☺</span><span class="sl">角色</span></button>
       <button type="button" data-view="pet"><span class="si">🔥</span><span class="sl">小火人</span></button>
       <button type="button" data-view="me"><span class="si">⚙</span><span class="sl">我们</span></button>
+      <button type="button" data-view="device"><span class="si">◎</span><span class="sl">设备</span></button>
     </div>
   </div>
 
@@ -1007,7 +1033,7 @@ var API = 'https://api.github.com';
 var FILE_NAME = 'couple.json';
 var LS_CFG = 'lp_cfg_v1';
 var LS_DATA = 'lp_data_v1';
-var BUILD_ID = 'b20261110-1700';
+var BUILD_ID = 'b20261110-1800';
 
 var cfg = null;
 var data = null;
@@ -1054,7 +1080,8 @@ function defaultData(){
     cycle : { records : [], dur : 5, ovu : [], len : 0, rid : {}, ovid : {}, sym : {} },
     char : { name : '小绒', face : '🐱', look : 'c1', style : '温柔', lines : [], hasAvatar : false, ts : 0 },
     games : { quiz : null, cards : [], wheel : null },
-    moods : {}
+    moods : {},
+    ping : {}
   };
 }
 function loadLocal(){
@@ -1146,6 +1173,14 @@ function mergeBond(l, r){
 }
 function mergeRemote(remote){
   if(!remote) return;
+  if(remote.ping){
+    var lp = data.ping || (data.ping = {});
+    ['A', 'B'].forEach(function(k){
+      var ro = remote.ping[k], lo = lp[k] || {};
+      if(ro && (ro.ts || 0) > (lo.ts || 0)) lp[k] = ro;
+      else if(!lp[k]) lp[k] = lo;
+    });
+  }
   if(remote.meta){
     var lm = data.meta || {}, rm = remote.meta;
     if((rm.ts || 0) > (lm.ts || 0)){
@@ -1394,6 +1429,7 @@ function render(){
   renderWishes();
   renderNotes();
   renderSettings();
+  if($("#view-device") && !$("#view-device").classList.contains("hidden")) renderDevice();
   if($('#view-photo') && !$('#view-photo').classList.contains('hidden')){
     renderPhotos();
     if(mealMode) renderMeals();
@@ -2150,6 +2186,62 @@ function esc(s){
 }
 
 /* ---------- 动作 ---------- */
+/* ---------- 设备状态 ---------- */
+function devName(){
+  var ua = navigator.userAgent || "";
+  var br = /MicroMessenger/i.test(ua) ? "微信"
+    : /QQ\//i.test(ua) ? "QQ 浏览器"
+    : /Edg\//i.test(ua) ? "Edge"
+    : (/Chrome\//i.test(ua) || /CriOS/i.test(ua)) ? "Chrome"
+    : /Safari/i.test(ua) ? "Safari" : "浏览器";
+  var os = /iPhone/i.test(ua) ? "iPhone"
+    : /iPad/i.test(ua) ? "iPad"
+    : /Android/i.test(ua) ? "安卓"
+    : /Windows/i.test(ua) ? "Windows"
+    : /Macintosh|Mac OS X/i.test(ua) ? "Mac" : "未知设备";
+  return os + " · " + br;
+}
+function pingObj(){
+  if(!data.ping) data.ping = {};
+  if(!data.ping.A) data.ping.A = {};
+  if(!data.ping.B) data.ping.B = {};
+  return data.ping;
+}
+function pingNow(force){
+  if(!cfg || !cfg.gistId) return;
+  var p = pingObj(), r = myRole(), o = p[r], now = Date.now();
+  if(!force && o.ts && (now - o.ts) < 60000) return;
+  o.ts = now; o.dev = devName(); o.ver = BUILD_ID;
+  saveLocal();
+  if($("#devState")) renderDevice();
+  commit().catch(function(){});
+}
+function agoTime(ts){
+  if(!ts) return "还没来过";
+  var d = Math.floor((Date.now() - ts) / 1000);
+  if(d < 60) return "刚刚";
+  if(d < 3600) return Math.floor(d / 60) + " 分钟前";
+  if(d < 86400) return Math.floor(d / 3600) + " 小时前";
+  var dt = new Date(ts);
+  return (dt.getMonth() + 1) + " 月 " + dt.getDate() + " 日";
+}
+function renderDevice(){
+  if(!$("#devState")) return;
+  var p = pingObj(), me = myRole(), ta = (me === "A" ? "B" : "A");
+  var o = p[ta] || {}, mine = p[me] || {};
+  var online = o.ts && (Date.now() - o.ts) < 150000;
+  $("#devDot").style.background = online ? "#5ad07a" : "rgba(255,255,255,.3)";
+  $("#devDot").style.boxShadow = online ? "0 0 10px rgba(90,208,122,.75)" : "none";
+  $("#devState").textContent = online ? "在线" : (o.ts ? "离线" : "还没来过");
+  $("#devLast").textContent = o.ts ? agoTime(o.ts) : "-";
+  $("#devDev").textContent = o.dev || "-";
+  $("#devVer").textContent = o.ver || "-";
+  $("#meDev").textContent = mine.dev || devName();
+  $("#meVer").textContent = mine.ver || BUILD_ID;
+  $("#meLast").textContent = mine.ts ? agoTime(mine.ts) : "-";
+  $("#meSync").textContent = lastSync ? agoTime(lastSync) : "-";
+}
+
 function act(fn){
   fn();
   saveLocal();
@@ -3426,6 +3518,11 @@ function renderQA(){
 
 /* ---------- 绑定 ---------- */
 $("#bondGoPet").addEventListener("click", function(){ showView("pet"); });
+if($("#devRefresh")) $("#devRefresh").addEventListener("click", function(){
+  pingNow(true);
+  renderDevice();
+  pull().then(function(){ renderDevice(); toast("已经拉到最新状态"); }).catch(function(e){ toast(e.message || "同步失败"); });
+});
 
 $("#qaSave").addEventListener("click", function(){
   var v = $("#qaInput").value.trim();
@@ -3725,7 +3822,7 @@ document.addEventListener("pointerup", function(e){
 }, true);
 
 /* ---------- 视图切换 ---------- */
-var MENU_VIEWS = ['note', 'games', 'pet', 'cycle', 'like', 'char', 'me'];
+var MENU_VIEWS = ['note', 'games', 'pet', 'cycle', 'like', 'char', 'me', 'device'];
 
 function openSheet(){ $('#sheet').classList.add('show'); $('#sheetMask').classList.add('show'); }
 function closeSheet(){ $('#sheet').classList.remove('show'); $('#sheetMask').classList.remove('show'); }
@@ -3778,6 +3875,10 @@ function checkUpdate(){
 /* ---------- 初始化界面 ---------- */
 function boot(){
   loadLocal();
+  setTimeout(function(){ pingNow(true); }, 600);
+  setInterval(function(){
+    if(document.visibilityState === 'visible') pingNow();
+  }, 60000);
   setTimeout(checkUpdate, 1200);
   if(cfg && cfg.token && cfg.gistId){
     $('#setup').classList.add('hidden');
@@ -3793,6 +3894,7 @@ function boot(){
     }, 9000);
     document.addEventListener('visibilitychange', function(){
       if(document.visibilityState === 'visible'){
+        pingNow();
         pull().then(function(){ render(); }).catch(function(){});
       }
     });
