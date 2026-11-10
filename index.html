@@ -90,6 +90,9 @@ input:focus,textarea:focus{border-color:rgba(255,159,196,.6);background:rgba(255
 textarea{resize:vertical;min-height:84px;line-height:1.7;}
 ::placeholder{color:rgba(244,238,255,.38);}
 .kicker{font-size:12px;letter-spacing:.18em;color:var(--pink-soft);opacity:.9;margin:0 0 10px;}
+.home-tip{margin:0 0 14px;padding:11px 14px;border-radius:14px;font-size:13px;line-height:1.6;
+  background:linear-gradient(135deg,rgba(255,214,166,.14),rgba(255,111,145,.18));
+  border:1px solid rgba(255,159,196,.4);color:#ffe3ec;}
 .hidden{display:none!important;}
 
 /* ---------- 一起看 / 养成 ---------- */
@@ -615,6 +618,8 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
       <div class="mini"><b id="miniNotes">0</b><span>句悄悄话</span></div>
     </div>
 
+    <div class="home-tip" id="homeTip" style="display:none"></div>
+
     <div class="char-card" id="homeChar">
       <div class="char-face" id="homeFace">🐱</div>
       <div class="char-talk" id="homeTalk">
@@ -745,7 +750,7 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
       <div class="set-row"><span>最近同步</span><b id="syncTime">-</b></div>
       <div class="set-row"><span>我的身份</span><b id="roleTxt">-</b></div>
       <div class="set-row"><span>空间编号</span><b id="gistId" style="font-size:11px">-</b></div>
-      <div class="set-row"><span>版本</span><b>v4.0</b></div>
+      <div class="set-row"><span>版本</span><b>v4.1</b></div>
       <div style="display:flex;gap:10px;margin-top:14px">
         <button class="btn small ghost" id="btnSync" style="flex:1">立即同步</button>
         <button class="btn small ghost" id="btnInvite" style="flex:1">复制邀请码</button>
@@ -1033,7 +1038,7 @@ var API = 'https://api.github.com';
 var FILE_NAME = 'couple.json';
 var LS_CFG = 'lp_cfg_v1';
 var LS_DATA = 'lp_data_v1';
-var BUILD_ID = 'b20261110-1800';
+var BUILD_ID = 'b20261110-1900';
 
 var cfg = null;
 var data = null;
@@ -1053,7 +1058,9 @@ function uid(){ return Date.now().toString(36) + Math.random().toString(36).slic
 function pad(n){ return n < 10 ? '0' + n : '' + n; }
 function parseDate(s){ var p = (s || '').split('-'); return new Date(+p[0], (+p[1] || 1) - 1, (+p[2] || 1)); }
 function fmtTime(ts){
+  if(!ts) return "";
   var d = new Date(ts), n = new Date();
+  if(isNaN(d.getTime())) return "";
   var sameDay = d.toDateString() === n.toDateString();
   if(sameDay) return '今天 ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
   return (d.getMonth() + 1) + '月' + d.getDate() + '日 ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
@@ -1428,6 +1435,7 @@ function render(){
   renderDiary();
   renderWishes();
   renderNotes();
+  renderHomeTip();
   renderSettings();
   if($("#view-device") && !$("#view-device").classList.contains("hidden")) renderDevice();
   if($('#view-photo') && !$('#view-photo').classList.contains('hidden')){
@@ -1459,7 +1467,7 @@ function renderMoods(){
     var nm = document.createElement('div');
     nm.className = 'mood-name';
     nm.textContent = nameOf(role) + (role === myRole() ? '（你）' : '') +
-      (mood ? ' · ' + fmtTime(mood.ts) : ' · 还没选');
+      (mood ? (fmtTime(mood.ts) ? ' · ' + fmtTime(mood.ts) : '') : ' · 还没选');
     right.appendChild(nm);
 
     var grid = document.createElement('div');
@@ -2169,6 +2177,24 @@ function renderWheel(){
   h2.className = 'wheel-hint';
   h2.textContent = '由 ' + nameOf(w.by) + ' 转出 · ' + fmtTime(w.ts);
   box.appendChild(h2);
+}
+
+function renderHomeTip(){
+  var el = $("#homeTip");
+  if(!el) return;
+  var st = cycleStats(), c = cycleObj();
+  var tips = [];
+  if(st.has){
+    var left = st.left;
+    if(left <= 0 && left > -st.dur) tips.push("她这几天应该正来着，多问一句、少说两句");
+    else if(left <= 3 && left > 0) tips.push("预计还有 " + left + " 天来，红糖姜茶可以先备上");
+    var om = calMarks(), tk = calKey(parseDate(todayStr()));
+    if(om[tk] && om[tk].o) tips.push("今天是排卵日");
+    else if(om[tk] && om[tk].f) tips.push("现在在易孕期；想要宝宝就抓紧，不想要记得防护");
+    void 0;
+  }
+  if(tips.length){ el.style.display = "block"; el.textContent = tips.join("　｜　"); }
+  else el.style.display = "none";
 }
 
 function renderGames(){
@@ -3245,7 +3271,7 @@ function bondObj(){
   return c.bond;
 }
 function bondLv(){ return 1 + Math.floor(bondObj().exp / 100); }
-function bondDo(kind, limit, exp, word){
+function bondDo_unused(kind, limit, exp, word){
   var b = bondObj(), r = myRole(), t = todayStr(), oldLv = bondLv();
   if(!b[kind][r]) b[kind][r] = { day : "", n : 0 };
   var o = b[kind][r];
@@ -3400,7 +3426,12 @@ var RPS_NAME = { r : "石头", s : "剪刀", p : "布" };
 var RPS_BEAT = { r : "s", s : "p", p : "r" };
 function rpsObj(){
   var g = gamesObj();
-  if(!g.rps) g.rps = { round : { A : "", B : "", n : 1 }, score : { A : 0, B : 0 }, hist : [] };
+  if(!g.rps) g.rps = {};
+  if(!g.rps.round) g.rps.round = { A : "", B : "", n : 1 };
+  if(!g.rps.round.A && g.rps.round.A !== "") g.rps.round.A = "";
+  if(!g.rps.round.B && g.rps.round.B !== "") g.rps.round.B = "";
+  if(!g.rps.round.n) g.rps.round.n = 1;
+  if(!g.rps.score) g.rps.score = { A : 0, B : 0 };
   if(!g.rps.hist) g.rps.hist = [];
   return g.rps;
 }
@@ -3875,6 +3906,8 @@ function checkUpdate(){
 /* ---------- 初始化界面 ---------- */
 function boot(){
   loadLocal();
+  window.addEventListener("offline", function(){ setSyncUI("err", "手机没网"); toast("网络断了，改完会先存在手机上，联网后自动同步"); });
+  window.addEventListener("online", function(){ toast("网回来了"); pull().then(function(){ render(); }).catch(function(){}); });
   setTimeout(function(){ pingNow(true); }, 600);
   setInterval(function(){
     if(document.visibilityState === 'visible') pingNow();
