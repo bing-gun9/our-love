@@ -130,7 +130,7 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
 .cyc-legend{flex-wrap:wrap;gap:10px;}
 .lg-pp{background:rgba(255,95,140,.16);border:1px dashed rgba(255,120,160,.6);}
 /* ---------- 小火人房间 ---------- */
-.pet-stage{position:relative;height:42vh;min-height:260px;border-radius:18px;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;padding:6px 0 10px;
+.pet-stage{position:relative;height:clamp(240px,36vh,340px);min-height:240px;border-radius:18px;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;padding:6px 0 10px;
   background:radial-gradient(110% 85% at 50% 28%, rgba(255,168,84,.20), rgba(16,12,26,.86) 68%);border:1px solid var(--line);}
 .pet-stage:after{content:"";position:absolute;left:0;right:0;bottom:0;height:38%;background:linear-gradient(to top, rgba(255,140,60,.10), transparent);pointer-events:none;}
 .pet-flame{position:relative;z-index:2;width:100%;display:flex;align-items:flex-end;justify-content:center;}
@@ -161,6 +161,22 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
 .pet-msg .who{display:block;font-size:10px;color:var(--muted);margin-bottom:3px;}
 .pet-pop{position:absolute;left:50%;top:24%;transform:translateX(-50%);font-size:13px;font-weight:600;color:#ffd9a0;z-index:3;animation:petPop 1.15s ease-out forwards;pointer-events:none;white-space:nowrap;}
 @keyframes petPop{0%{opacity:0;transform:translate(-50%,6px) scale(.9);}22%{opacity:1;transform:translate(-50%,-6px) scale(1);}100%{opacity:0;transform:translate(-50%,-46px) scale(1);}}
+.pet-hat{position:absolute;left:50%;top:5%;transform:translateX(-50%) rotate(-8deg);font-size:clamp(30px,8.6vw,44px);line-height:1;z-index:4;pointer-events:none;filter:drop-shadow(0 4px 8px rgba(0,0,0,.4));animation:petHat 3.4s ease-in-out infinite;}
+@keyframes petHat{0%,100%{transform:translate(-50%,0) rotate(-8deg);}50%{transform:translate(-50%,-9px) rotate(-6deg);}}
+.pet-acc{position:absolute;left:50%;bottom:15%;transform:translateX(-50%);font-size:clamp(18px,5vw,27px);line-height:1;z-index:4;pointer-events:none;}
+.pet-ball{position:absolute;left:50%;bottom:24%;width:34px;height:34px;border-radius:50%;background:radial-gradient(circle at 33% 28%,#fff6d2,#ff9138);box-shadow:0 8px 18px rgba(0,0,0,.45);z-index:6;cursor:pointer;transition:left .55s cubic-bezier(.2,.8,.4,1),bottom .7s ease-out;animation:petBallSpin 1.1s linear infinite;}
+@keyframes petBallSpin{from{transform:rotate(0);}to{transform:rotate(360deg);}}
+.pet-ball-hit{animation:petBallHit .5s ease-out forwards;}
+@keyframes petBallHit{0%{transform:scale(1);opacity:1;}100%{transform:scale(1.9);opacity:0;}}
+.outfit-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;}
+.outfit-item{position:relative;background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:13px;color:var(--text);font-family:inherit;padding:10px 2px 7px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;}
+.outfit-item .oi{font-size:23px;line-height:1.1;}
+.outfit-item .ol{font-size:11.5px;color:var(--muted);}
+.outfit-item .olk{font-size:9.5px;color:#ffc98a;}
+.outfit-item.on{background:rgba(255,150,60,.16);border-color:rgba(255,150,60,.62);}
+.outfit-item.on .ol{color:#ffd9a0;}
+.outfit-item.locked{opacity:.52;}
+.outfit-item:active{transform:scale(.96);}
 /* ---------- 第一次设置 ---------- */
 #setup{
   min-height:100vh;display:flex;flex-direction:column;justify-content:center;
@@ -725,7 +741,7 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
       <div class="set-row"><span>最近同步</span><b id="syncTime">-</b></div>
       <div class="set-row"><span>我的身份</span><b id="roleTxt">-</b></div>
       <div class="set-row"><span>空间编号</span><b id="gistId" style="font-size:11px">-</b></div>
-      <div class="set-row"><span>版本</span><b>v3.3</b></div>
+      <div class="set-row"><span>版本</span><b>v3.5</b></div>
       <div style="display:flex;gap:10px;margin-top:14px">
         <button class="btn small ghost" id="btnSync" style="flex:1">立即同步</button>
         <button class="btn small ghost" id="btnInvite" style="flex:1">复制邀请码</button>
@@ -931,13 +947,23 @@ textarea{resize:vertical;min-height:84px;line-height:1.7;}
         <button class="pet-act" id="petTouchBtn" type="button"><b>✋</b><span>摸摸</span></button>
         <button class="pet-act" id="petPlayBtn" type="button"><b>🎾</b><span>玩耍</span></button>
         <button class="pet-act" id="petSleepBtn" type="button"><b>🌙</b><span>哄睡</span></button>
+        <button class="pet-act" id="petBathBtn" type="button"><b>🛁</b><span>洗澡</span></button>
+        <button class="pet-act" id="petTickleBtn" type="button"><b>🪶</b><span>挠痒</span></button>
+        <button class="pet-act" id="petSingBtn" type="button"><b>🎤</b><span>唱歌</span></button>
+        <button class="pet-act" id="petWalkBtn" type="button"><b>🚶</b><span>散步</span></button>
       </div>
       <div class="pet-foods hidden" id="petFoods">
         <button type="button" data-food="🍬 棉花糖">🍬 棉花糖</button>
         <button type="button" data-food="🍠 烤红薯">🍠 烤红薯</button>
         <button type="button" data-food="🍰 小蛋糕">🍰 小蛋糕</button>
       </div>
-      <p class="tip" id="petTip">它饿了自己会叫。你们两个喂都算数，谁喂得多它就更黏谁。</p>
+      <p class="tip" id="petTip">每人每天：喂 1 次、摸摸 3 次、抛球 2 次、洗澡 1 次、挠痒 3 次、唱歌 2 次、散步 2 次。你们俩做的都算数，谁陪得多它就更黏谁。</p>
+    </div>
+
+    <p class="sec-title">它的衣柜 <span id="outfitLvHint" style="color:rgba(244,238,255,.5);font-size:11px">Lv 1</span></p>
+    <div class="card">
+      <div class="outfit-grid" id="outfitGrid"></div>
+      <p class="tip">亲密度升 1 级解锁一批新衣服，两个人共用一套。换好后 TA 那边下拉刷新就跟着变了。</p>
     </div>
 
     <p class="sec-title">聊天记录</p>
@@ -977,7 +1003,7 @@ var API = 'https://api.github.com';
 var FILE_NAME = 'couple.json';
 var LS_CFG = 'lp_cfg_v1';
 var LS_DATA = 'lp_data_v1';
-var BUILD_ID = 'b20261110-1100';
+var BUILD_ID = 'b20261110-1300';
 
 var cfg = null;
 var data = null;
@@ -1039,6 +1065,7 @@ function loadLocal(){
   if(!data.likes) data.likes = [];
   if(!data.char) data.char = { name : '小绒', face : '🐱', look : 'c1', style : '温柔', lines : [], hasAvatar : false, ts : 0 };
   if(!data.char.look) data.char.look = 'f1';
+  if(!data.char.outfit) data.char.outfit = 'none';
   else if(/^c[1-8]$/.test(data.char.look)) data.char.look = 'f1';
   else if(data.char.look === 'c9') data.char.look = 'f2';
   if(!data.char.lines) data.char.lines = [];
@@ -2702,10 +2729,44 @@ function flameMood(){
   return "normal";
 }
 
-function flameSvg(mood, lv, bear){
+var SUIT_CFG = {
+  bear  : { fur : '#c08552', belly : '#f4dcbb', paw : '#a9714a',
+            ears : '<circle cx="27" cy="21" r="10" fill="#a9714a"/><circle cx="73" cy="21" r="10" fill="#a9714a"/><circle cx="27" cy="21" r="5.6" fill="#e8c39e"/><circle cx="73" cy="21" r="5.6" fill="#e8c39e"/><path d="M30 38 q20 -10 40 0" stroke="#8f5f3e" stroke-width="2.2" fill="none"/>',
+            back : '<circle cx="82" cy="73" r="6.6" fill="#a9714a"/>' },
+  panda : { fur : '#f3f3f3', belly : '#ffffff', paw : '#3b3b3b',
+            ears : '<circle cx="29" cy="17" r="9" fill="#3b3b3b"/><circle cx="71" cy="17" r="9" fill="#3b3b3b"/><circle cx="29" cy="17" r="4.6" fill="#666"/><circle cx="71" cy="17" r="4.6" fill="#666"/><ellipse cx="40" cy="57" rx="7.2" ry="6.8" fill="#3b3b3b" opacity=".9"/><ellipse cx="60" cy="57" rx="7.2" ry="6.8" fill="#3b3b3b" opacity=".9"/>',
+            eye : '#f7f7f7' },
+  bunny : { fur : '#fff1f5', belly : '#ffffff', paw : '#ffd9e2',
+            ears : '<ellipse cx="35" cy="11" rx="6" ry="15" fill="#ffd9e2" transform="rotate(-13 35 11)"/><ellipse cx="35" cy="12" rx="3.2" ry="10.5" fill="#ffb0c0" transform="rotate(-13 35 12)"/><ellipse cx="65" cy="11" rx="6" ry="15" fill="#ffd9e2" transform="rotate(13 65 11)"/><ellipse cx="65" cy="12" rx="3.2" ry="10.5" fill="#ffb0c0" transform="rotate(13 65 12)"/>',
+            back : '<circle cx="83" cy="74" r="7" fill="#fff"/>' },
+  cat   : { fur : '#f7b267', belly : '#ffeccd', paw : '#ffcf94',
+            ears : '<path d="M33 29 L23 8 L46 22 Z" fill="#f7b267"/><path d="M33 26 L27 14 L41 21 Z" fill="#ffb0c0"/><path d="M67 29 L77 8 L54 22 Z" fill="#f7b267"/><path d="M67 26 L73 14 L59 21 Z" fill="#ffb0c0"/>',
+            front : '<path d="M44 30 q4 -5 9 0" stroke="#d99447" stroke-width="2" fill="none"/><path d="M53 28 q4 -5 9 0" stroke="#d99447" stroke-width="2" fill="none"/>',
+            back : '<path d="M80 74 q15 -6 9 -21" stroke="#f7b267" stroke-width="4.2" fill="none" stroke-linecap="round"/>' },
+  devil : { fur : '#c9524f', belly : '#b83a37', paw : '#a63f3c',
+            front : '<path d="M33 22 q-7 -13 1 -16 q5 7 3 16 Z" fill="#5e211f"/><path d="M67 22 q7 -13 -1 -16 q-5 7 -3 16 Z" fill="#5e211f"/>',
+            back : '<path d="M78 74 q17 8 7 21" stroke="#5e211f" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M85 97 l-4 7 l8 -2 Z" fill="#5e211f"/>' },
+  angel : { fur : '#fff7e2', belly : '#ffeec2', paw : '#ffe9bb',
+            front : '<ellipse cx="50" cy="7" rx="16" ry="4.6" fill="#ffe08a" opacity=".95"/><ellipse cx="50" cy="7" rx="16" ry="4.6" fill="none" stroke="#ffc94d" stroke-width="1.6"/>',
+            back : '<path d="M26 64 q-18 -8 -15 13 q11 2 15 -13 Z" fill="#fff2cf" opacity=".95"/><path d="M74 64 q18 -8 15 13 q-11 2 -15 -13 Z" fill="#fff2cf" opacity=".95"/>' },
+  santa : { fur : '#e1544f', belly : '#ffffff', paw : '#e1544f',
+            front : '<path d="M30 26 q17 -17 40 0 Z" fill="#e04b4b"/><path d="M64 13 q10 1 8 8" stroke="#e04b4b" stroke-width="7" fill="none" stroke-linecap="round"/><circle cx="74" cy="13" r="5" fill="#fff"/><rect x="26" y="23" width="48" height="6.4" rx="3.2" fill="#fff"/><path d="M33 82 q17 8 34 0" stroke="#e04b4b" stroke-width="7" fill="none" stroke-linecap="round"/>' },
+  space : { fur : '#cfd8f2', belly : '#a8b8f0', paw : '#b9c6ee',
+            front : '<circle cx="50" cy="53" r="46" fill="#9fd7ff" opacity=".13"/><circle cx="50" cy="53" r="46" fill="none" stroke="#bfe8ff" stroke-width="2" opacity=".5"/><path d="M50 6 q6 -6 12 -2" stroke="#bfe8ff" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="63" cy="3" r="3" fill="#ffd166"/>' },
+  crown : { fur : '#f6e3c5', belly : '#ffeec9', paw : '#eed6b0',
+            front : '<path d="M29 24 l0 -13 l9 7 l6 -13 l6 13 l9 -7 l0 13 Z" fill="#ffd166"/><circle cx="38" cy="13" r="2" fill="#ff7aa2"/><circle cx="50" cy="10" r="2" fill="#7ad3ff"/><circle cx="62" cy="13" r="2" fill="#ff7aa2"/>',
+            back : '<path d="M24 52 q-9 28 5 42 q20 -8 21 -42 Z" fill="#b58cf0" opacity=".5"/>' },
+  bow   : { fur : '#ffe3ec', belly : '#fff5f8', paw : '#ffd0dd',
+            front : '<path d="M50 22 q-15 -11 -19 1 q4 12 19 -1 Z" fill="#ff7aa2"/><path d="M50 22 q15 -11 19 1 q-4 12 -19 -1 Z" fill="#ff7aa2"/><circle cx="50" cy="22" r="4.2" fill="#ff4f7a"/>' },
+  cap   : { fur : '#dbe6ff', belly : '#ffffff', paw : '#c9d8ff',
+            front : '<path d="M25 27 q25 -18 50 0 q-5 7 -25 7 q-20 0 -25 -7 Z" fill="#4f7fd9"/><path d="M25 26 q-10 2 -9 7 q11 2 11 -3 Z" fill="#3a63ad"/><circle cx="50" cy="13" r="2.6" fill="#7fa6e8"/>' }
+};
+
+function flameSvg(mood, lv, bear, dress){
   flameSeq++;
   var gid = "fg" + flameSeq;
   var sc = lv >= 7 ? 1.05 : (lv >= 4 ? 1.0 : 0.94);
+  var S = (dress && SUIT_CFG[dress]) ? SUIT_CFG[dress] : null;
   var s = "";
   s += '<defs><radialGradient id="' + gid + '" cx="50%" cy="58%" r="66%">' +
        '<stop offset="0%" stop-color="#fff8cf"/>' +
@@ -2715,50 +2776,64 @@ function flameSvg(mood, lv, bear){
        '</radialGradient></defs>';
   s += '<ellipse cx="50" cy="60" rx="36" ry="37" fill="#ff9a3c" opacity=".16"/>';
   s += '<g transform="translate(50 52) scale(' + sc + ') translate(-50 -52)">';
+  if(S && S.back) s += S.back;
   /* 火苗主体 */
   s += '<path d="M50 6 C 63 17, 77 35, 78 55 C 79 77, 65 92, 50 92 C 35 92, 21 77, 22 55 C 23 35, 37 17, 50 6 Z" fill="url(#' + gid + ')"/>';
-  /* 侧边小火苗尖 */
-  s += '<path d="M63 13 C 71 20, 76 31, 73 43 C 69 34, 66 26, 63 13 Z" fill="#ffbc55" opacity=".8"/>';
-  s += '<path d="M38 30 q9 -7 18 -3" stroke="#fff6d6" stroke-width="2" fill="none" opacity=".28" stroke-linecap="round"/>';
+  /* 套装底色 */
+  if(S) s += '<path d="M50 9 C 61 19, 73 36, 74 55 C 75 76, 63 90, 50 90 C 37 90, 25 76, 26 55 C 27 36, 39 19, 50 9 Z" fill="' + S.fur + '"/>';
+  if(!S){
+    s += '<path d="M63 13 C 71 20, 76 31, 73 43 C 69 34, 66 26, 63 13 Z" fill="#ffbc55" opacity=".8"/>';
+    s += '<path d="M38 30 q9 -7 18 -3" stroke="#fff6d6" stroke-width="2" fill="none" opacity=".28" stroke-linecap="round"/>';
+  }else{
+    s += '<path d="M40 26 q10 -6 20 0" stroke="#fff" stroke-width="1.6" fill="none" opacity=".22"/>';
+  }
   /* 手脚 */
-  s += '<circle cx="25" cy="72" r="6.4" fill="#ff8f3a"/>';
-  s += '<circle cx="75" cy="72" r="6.4" fill="#ff8f3a"/>';
-  s += '<circle cx="37" cy="89" r="5.4" fill="#f5873a"/>';
-  s += '<circle cx="63" cy="89" r="5.4" fill="#f5873a"/>';
-  /* 熊套装 */
-  if(bear){
+  var pawC = S ? (S.paw || S.fur) : "#ff8f3a";
+  var pawC2 = S ? (S.paw || S.fur) : "#f5873a";
+  s += '<circle cx="25" cy="72" r="6.4" fill="' + pawC + '"/>';
+  s += '<circle cx="75" cy="72" r="6.4" fill="' + pawC + '"/>';
+  s += '<circle cx="37" cy="89" r="5.4" fill="' + pawC2 + '"/>';
+  s += '<circle cx="63" cy="89" r="5.4" fill="' + pawC2 + '"/>';
+  /* 肚皮 */
+  if(S && S.belly) s += '<ellipse cx="50" cy="77" rx="12.5" ry="9" fill="' + S.belly + '"/>';
+  /* 耳朵 / 角 / 翅膀 */
+  if(S && S.ears) s += S.ears;
+  if(bear && !S){
     s += '<circle cx="27" cy="24" r="9.5" fill="#a9714a"/><circle cx="73" cy="24" r="9.5" fill="#a9714a"/>';
     s += '<circle cx="27" cy="24" r="5" fill="#e8c39e"/><circle cx="73" cy="24" r="5" fill="#e8c39e"/>';
     s += '<path d="M30 36 q20 -10 40 0" stroke="#8f5f3e" stroke-width="2.4" fill="none"/>';
     s += '<ellipse cx="50" cy="78" rx="9" ry="7" fill="#f4dcbb"/>';
   }
   /* 表情 */
+  var eyeC = (S && S.eye) ? S.eye : '#53290f';
+  var mouthC = (S && S.eye) ? '#7a4a2a' : '#a23f14';
   if(mood === "happy"){
-    s += '<path d="M35 57 q5 -6 10 0" stroke="#53290f" stroke-width="2.8" fill="none" stroke-linecap="round"/>';
-    s += '<path d="M55 57 q5 -6 10 0" stroke="#53290f" stroke-width="2.8" fill="none" stroke-linecap="round"/>';
-    s += '<path d="M45 67 q5 6 10 0" stroke="#a23f14" stroke-width="2.2" fill="none" stroke-linecap="round"/>';
+    s += '<path d="M35 57 q5 -6 10 0" stroke="' + eyeC + '" stroke-width="2.8" fill="none" stroke-linecap="round"/>';
+    s += '<path d="M55 57 q5 -6 10 0" stroke="' + eyeC + '" stroke-width="2.8" fill="none" stroke-linecap="round"/>';
+    s += '<path d="M45 67 q5 6 10 0" stroke="' + mouthC + '" stroke-width="2.2" fill="none" stroke-linecap="round"/>';
   }else if(mood === "hungry"){
-    s += '<circle cx="40" cy="58" r="3" fill="#53290f"/><circle cx="60" cy="58" r="3" fill="#53290f"/>';
+    s += '<circle cx="40" cy="58" r="3" fill="' + eyeC + '"/><circle cx="60" cy="58" r="3" fill="' + eyeC + '"/>';
     s += '<circle cx="40.8" cy="56.6" r="1" fill="#fff" opacity=".8"/><circle cx="60.8" cy="56.6" r="1" fill="#fff" opacity=".8"/>';
-    s += '<circle cx="39" cy="60" r="2.4" fill="#53290f"/><circle cx="61" cy="60" r="2.4" fill="#53290f"/>';
-    s += '<path d="M47 70 q3 -2 6 0" stroke="#a23f14" stroke-width="2" fill="none" stroke-linecap="round"/>';
+    s += '<circle cx="39" cy="60" r="2.4" fill="' + eyeC + '"/><circle cx="61" cy="60" r="2.4" fill="' + eyeC + '"/>';
+    s += '<path d="M47 70 q3 -2 6 0" stroke="' + mouthC + '" stroke-width="2" fill="none" stroke-linecap="round"/>';
     s += '<circle cx="56" cy="74" r="1.2" fill="#8fd3ff" opacity=".85"/>';
-    s += '<ellipse cx="50" cy="70" rx="3.4" ry="4.4" fill="#a23f14" opacity=".55"/>';
-    }else if(mood === "sleepy"){
-    s += '<path d="M36 58 q4 3 8 0" stroke="#53290f" stroke-width="2.6" fill="none" stroke-linecap="round"/>';
-    s += '<path d="M56 58 q4 3 8 0" stroke="#53290f" stroke-width="2.6" fill="none" stroke-linecap="round"/>';
-    s += '<path d="M46 68 q4 2 8 0" stroke="#a23f14" stroke-width="2" fill="none" stroke-linecap="round"/>';
+    s += '<ellipse cx="50" cy="70" rx="3.4" ry="4.4" fill="' + mouthC + '" opacity=".55"/>';
+  }else if(mood === "sleepy"){
+    s += '<path d="M36 58 q4 3 8 0" stroke="' + eyeC + '" stroke-width="2.6" fill="none" stroke-linecap="round"/>';
+    s += '<path d="M56 58 q4 3 8 0" stroke="' + eyeC + '" stroke-width="2.6" fill="none" stroke-linecap="round"/>';
+    s += '<path d="M46 68 q4 2 8 0" stroke="' + mouthC + '" stroke-width="2" fill="none" stroke-linecap="round"/>';
     s += '<text x="76" y="34" font-size="10" fill="#ffd8a0">z</text><text x="82" y="26" font-size="8" fill="#ffd8a0">z</text>';
   }else if(mood === "grumpy"){
-    s += '<path d="M34 51 l7 3" stroke="#53290f" stroke-width="2.2" fill="none"/>';
-    s += '<path d="M66 51 l-7 3" stroke="#53290f" stroke-width="2.2" fill="none"/>';
-    s += '<circle cx="40" cy="59" r="3.6" fill="#53290f"/><circle cx="60" cy="59" r="3.6" fill="#53290f"/>';
-    s += '<path d="M46 70 q4 -3 8 0" stroke="#a23f14" stroke-width="2.2" fill="none" stroke-linecap="round"/>';
+    s += '<path d="M34 51 l7 3" stroke="' + eyeC + '" stroke-width="2.2" fill="none"/>';
+    s += '<path d="M66 51 l-7 3" stroke="' + eyeC + '" stroke-width="2.2" fill="none"/>';
+    s += '<circle cx="40" cy="59" r="3.6" fill="' + eyeC + '"/><circle cx="60" cy="59" r="3.6" fill="' + eyeC + '"/>';
+    s += '<path d="M46 70 q4 -3 8 0" stroke="' + mouthC + '" stroke-width="2.2" fill="none" stroke-linecap="round"/>';
   }else{
-    s += '<circle cx="40" cy="57" r="4.4" fill="#53290f"/><circle cx="60" cy="57" r="4.4" fill="#53290f"/>';
+    s += '<circle cx="40" cy="57" r="4.4" fill="' + eyeC + '"/><circle cx="60" cy="57" r="4.4" fill="' + eyeC + '"/>';
     s += '<circle cx="41.5" cy="55.5" r="1.5" fill="#fff"/><circle cx="61.5" cy="55.5" r="1.5" fill="#fff"/>';
-    s += '<path d="M45 67 q5 5 10 0" stroke="#a23f14" stroke-width="2.1" fill="none" stroke-linecap="round"/>';
+    s += '<path d="M45 67 q5 5 10 0" stroke="' + mouthC + '" stroke-width="2.1" fill="none" stroke-linecap="round"/>';
   }
+  if(S && S.front) s += S.front;
   /* 等级越高，火星越多 */
   if(lv >= 4){
     s += '<circle cx="82" cy="40" r="2.6" fill="#ffd166" opacity=".9"/>';
@@ -2771,7 +2846,6 @@ function flameSvg(mood, lv, bear){
   s += '</g>';
   return '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">' + s + '</svg>';
 }
-
 function chibiSvg(lookId){
   var L = null;
   for(var i = 0; i < CHAR_LOOKS.length; i++){ if(CHAR_LOOKS[i].id === lookId) L = CHAR_LOOKS[i]; }
@@ -2852,6 +2926,7 @@ function charObj(){
   if(!data.char) data.char = defaultChar();
   if(!data.char.lines) data.char.lines = [];
   if(!data.char.look) data.char.look = 'f1';
+  if(!data.char.outfit) data.char.outfit = 'none';
   else if(/^c[1-8]$/.test(data.char.look)) data.char.look = 'f1';
   else if(data.char.look === 'c9') data.char.look = 'f2';
   return data.char;
@@ -3086,6 +3161,131 @@ function renderBond(){
   if($("#bondBar")) $("#bondBar").style.width = Math.min(100, b.exp % 100) + "%";
   if($("#bondTip")) $("#bondTip").textContent = "还差 " + rest + " 点升到 Lv " + (lv + 1) + " · 累计 " + b.exp;
   if($("#homeLv")) $("#homeLv").textContent = "🔥 Lv " + lv;
+}
+
+/* ---------- 小火人的衣柜 ---------- */
+var PET_OUTFITS = [
+{ id : 'none',  name : '原样',   icon : '🔥', lv : 1 },
+{ id : 'bear',  name : '小熊装', icon : '🐻', lv : 1 },
+{ id : 'bow',   name : '蝴蝶结', icon : '🎀', lv : 1 },
+{ id : 'cat',   name : '猫猫装', icon : '🐱', lv : 2 },
+{ id : 'cap',   name : '运动装', icon : '🧢', lv : 2 },
+{ id : 'bunny', name : '兔兔装', icon : '🐰', lv : 3 },
+{ id : 'devil', name : '小恶魔', icon : '😈', lv : 3 },
+{ id : 'angel', name : '小天使', icon : '😇', lv : 4 },
+{ id : 'panda', name : '熊猫装', icon : '🐼', lv : 4 },
+{ id : 'santa', name : '圣诞装', icon : '🎅', lv : 5 },
+{ id : 'crown', name : '小皇冠', icon : '👑', lv : 6 },
+{ id : 'space', name : '太空装', icon : '🪐', lv : 7 }
+];
+function outfitOf(){
+  var id = charObj().outfit || 'none';
+  for(var i = 0; i < PET_OUTFITS.length; i++){ if(PET_OUTFITS[i].id === id) return PET_OUTFITS[i]; }
+  return PET_OUTFITS[0];
+}
+function renderOutfits(){
+  var box = $("#outfitGrid");
+  if(!box) return;
+  var lv = bondLv(), cur = outfitOf().id;
+  if($("#outfitLvHint")) $("#outfitLvHint").textContent = "Lv " + lv + " · 已解锁 " + PET_OUTFITS.filter(function(o){ return o.lv <= lv; }).length + "/" + PET_OUTFITS.length;
+  box.innerHTML = "";
+  PET_OUTFITS.forEach(function(o){
+    var locked = lv < o.lv;
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "outfit-item" + (cur === o.id ? " on" : "") + (locked ? " locked" : "");
+    var ic = document.createElement("span");
+    ic.className = "oi";
+    ic.textContent = locked ? "🔒" : (o.icon || "🔥");
+    var nm = document.createElement("span");
+    nm.className = "ol";
+    nm.textContent = o.name;
+    b.appendChild(ic);
+    b.appendChild(nm);
+    if(locked){
+      var lk = document.createElement("span");
+      lk.className = "olk";
+      lk.textContent = "Lv " + o.lv;
+      b.appendChild(lk);
+    }
+    b.addEventListener("click", function(){
+      if(locked){ toast("亲密度到 Lv " + o.lv + " 才解锁这件"); return; }
+      if(charObj().outfit !== o.id){
+        charObj().outfit = o.id;
+        charObj().ts = Date.now();
+        saveLocal();
+        renderPet();
+        renderOutfits();
+        toast("换上「" + o.name + "」了");
+        commit().catch(function(e){ toast(e.message); });
+      }
+    });
+    box.appendChild(b);
+  });
+}
+
+/* ---------- 多出来的互动 ---------- */
+var PET_ACT_CFG = {
+  bath   : { limit : 1, exp : 9,  mood : 16, energy : -6,  hunger : 0,   lines : ['泡泡好多，别把我洗丢啦。', '洗香香了，抱起来更好闻吧？'] },
+  tickle : { limit : 3, exp : 6,  mood : 12, energy : -3,  hunger : 0,   lines : ['哈哈哈不行了，痒！', '别挠脚底，我会笑到站不住的。'] },
+  sing   : { limit : 2, exp : 8,  mood : 14, energy : 4,   hunger : 0,   lines : ['你唱，我跟着摇。', '再唱一首，我火焰都在打拍子。'] },
+  walk   : { limit : 2, exp : 12, mood : 10, energy : -16, hunger : -8,  lines : ['走走走，牵着我别松手。', '外面风大，我贴着你们走。'] }
+};
+function petAct(kind){
+  var p = petObj(), cfg2 = PET_ACT_CFG[kind];
+  if(!cfg2) return;
+  if(petState() === "sleepy"){ toast("它睡着了，先哄睡一下再玩"); return; }
+  var b = bondObj(), r = myRole(), t = todayStr(), oldLv = bondLv();
+  var key = "act_" + kind;
+  if(!b[key]) b[key] = {};
+  if(!b[key][r]) b[key][r] = { day : "", n : 0 };
+  var o = b[key][r];
+  if(o.day !== t){ o.day = t; o.n = 0; }
+  if(o.n >= cfg2.limit){ toast("今天已经够啦，明天再来"); return; }
+  o.n++;
+  p.mood = clamp(p.mood + cfg2.mood, 0, 100);
+  p.energy = clamp(p.energy + cfg2.energy, 0, 100);
+  if(cfg2.hunger) p.hunger = clamp(p.hunger + cfg2.hunger, 0, 100);
+  b.exp += cfg2.exp;
+  b.ts = Date.now();
+  charObj().ts = Date.now();
+  petPush("pet", cfg2.lines[Math.floor(Math.random() * cfg2.lines.length)]);
+  saveLocal();
+  renderPet();
+  renderOutfits();
+  petPop("+" + cfg2.exp);
+  var nl = bondLv();
+  toast(nl > oldLv ? ("升到 Lv " + nl + " 啦，新衣服解锁了") : ("陪它" + (kind === "bath" ? "洗澡" : kind === "tickle" ? "挠痒" : kind === "sing" ? "唱歌" : "散步") + " +" + cfg2.exp));
+  commit().catch(function(e){ toast(e.message); });
+}
+function petBall(){
+  var stage = $("#petStage");
+  if(!stage) return;
+  if(stage.querySelector(".pet-ball")) return;
+  var b = document.createElement("div");
+  b.className = "pet-ball";
+  stage.appendChild(b);
+  var hit = false;
+  setTimeout(function(){
+    b.style.left = (18 + Math.random() * 62) + "%";
+    b.style.bottom = (44 + Math.random() * 20) + "%";
+  }, 60);
+  b.addEventListener("click", function(e){
+    e.stopPropagation();
+    if(hit) return;
+    hit = true;
+    bondObj().exp += 3;
+    bondObj().ts = Date.now();
+    petPush("pet", "接住啦！再抛一个，这次我要跳起来接。");
+    saveLocal();
+    renderOutfits();
+    petPop("+3 接住");
+    b.classList.add("pet-ball-hit");
+    setTimeout(function(){ if(b.parentNode) b.parentNode.removeChild(b); }, 500);
+    toast("接住了 +3 亲密");
+    commit().catch(function(e){ toast(e.message); });
+  });
+  setTimeout(function(){ if(b.parentNode && !hit) b.parentNode.removeChild(b); }, 3000);
 }
 
 /* ---------- 石头剪刀布 ---------- */
@@ -3339,7 +3539,8 @@ function renderPet(){
   var flame = $("#petFlame");
   if(flame){
     var st = petState();
-    flame.innerHTML = flameSvg(st, lv, charObj().look === "f2");
+    var of = outfitOf();
+    flame.innerHTML = flameSvg(st, lv, charObj().look === "f2" || of.id === "bear", of.id);
     var svg = flame.querySelector("svg");
     if(svg){
       svg.addEventListener("click", function(){
@@ -3349,6 +3550,7 @@ function renderPet(){
   }
 
   if($("#petSay")) $("#petSay").textContent = petStatusText();
+  if($("#outfitGrid")) renderOutfits();
 
   var chat = $("#petChat");
   if(chat){
@@ -3420,6 +3622,7 @@ function petPlay(){
   petPush("pet", "再来一次！我要追那个球！");
   saveLocal();
   renderPet();
+  petBall();
   petPop("+7 开心");
   commit().catch(function(e){ toast(e.message); });
 }
@@ -3466,6 +3669,10 @@ $("#petFoods").addEventListener("click", function(e){
 $("#petTouchBtn").addEventListener("click", function(){ petTouch(false); });
 $("#petPlayBtn").addEventListener("click", function(){ petPlay(); });
 $("#petSleepBtn").addEventListener("click", function(){ petSleep(); });
+$("#petBathBtn").addEventListener("click", function(){ petAct("bath"); });
+$("#petTickleBtn").addEventListener("click", function(){ petAct("tickle"); });
+$("#petSingBtn").addEventListener("click", function(){ petAct("sing"); });
+$("#petWalkBtn").addEventListener("click", function(){ petAct("walk"); });
 $("#petSend").addEventListener("click", petSend);
 $("#petInput").addEventListener("keydown", function(e){ if(e.key === "Enter"){ e.preventDefault(); petSend(); } });
 
